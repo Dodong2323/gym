@@ -39,7 +39,7 @@ class _GuestScreenState extends State<GuestScreen> {
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Colors.blue,
+                color: Colors.white,
               ),
             ),
             const SizedBox(height: 10),
