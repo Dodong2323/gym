@@ -8,88 +8,105 @@ void main() {
 }
 
 class GymProgramsPage extends StatelessWidget {
-  // Dummy data for the programs
-  final Map<String, List<Map<String, String>>> programDetails = {
-    'Strength Training': [
-      {'exercise': 'Squats', 'sets': '4', 'reps': '12', 'time': '30 min'},
-      {'exercise': 'Deadlifts', 'sets': '3', 'reps': '10', 'time': '25 min'},
-      {'exercise': 'Bench Press', 'sets': '4', 'reps': '12', 'time': '20 min'},
-    ],
-    'Cardio Program': [
-      {'exercise': 'Running', 'sets': '3', 'reps': '5 km', 'time': '30 min'},
-      {'exercise': 'Cycling', 'sets': '3', 'reps': '20 km', 'time': '40 min'},
-      {'exercise': 'Jump Rope', 'sets': '4', 'reps': '10 min', 'time': '15 min'},
-    ],
-    'Yoga Sessions': [
-      {'exercise': 'Sun Salutation', 'sets': '5', 'reps': '5 min', 'time': '15 min'},
-      {'exercise': 'Warrior Pose', 'sets': '4', 'reps': '5 min', 'time': '20 min'},
-      {'exercise': 'Downward Dog', 'sets': '5', 'reps': '5 min', 'time': '20 min'},
-    ],
-    'HIIT Workouts': [
-      {'exercise': 'Burpees', 'sets': '4', 'reps': '30', 'time': '10 min'},
-      {'exercise': 'Mountain Climbers', 'sets': '4', 'reps': '40', 'time': '15 min'},
-      {'exercise': 'Jumping Jacks', 'sets': '4', 'reps': '50', 'time': '10 min'},
-    ],
-  };
+  final List<Map<String, String>> exercises = [
+    {'exercise': 'Plate-Loaded Incline Chest Press', 'sets': '3', 'reps': '12', 'weight': '80.5kg', 'time': '10 mins'},
+    {'exercise': 'Plate-Loaded Incline Chest Press', 'sets': '3', 'reps': '12', 'weight': '80.5kg', 'time': '10 mins'},
+    {'exercise': 'Plate-Loaded Incline Chest Press', 'sets': '3', 'reps': '12', 'weight': '80.5kg', 'time': '10 mins'},
+    {'exercise': 'Plate-Loaded Incline Chest Press', 'sets': '3', 'reps': '12', 'weight': '80.5kg', 'time': '10 mins'},
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        title: Text('Thursday'),
+        backgroundColor: Colors.black,
+        actions: [IconButton(onPressed: () {}, icon: Icon(Icons.notifications))],
+      ),
+      body: Column(
         children: [
-          // Header Background Gradient
-          Container(
-            height: 250,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.orange.shade300, Colors.orange.shade800],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
+          Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.orange,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text('Chest/Back', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                ),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                  onPressed: () {},
+                  icon: Icon(Icons.add, color: Colors.white),
+                  label: Text('Add Exercise', style: TextStyle(color: Colors.white)),
+                ),
+              ],
             ),
           ),
-          SafeArea(
-            child: Column(
-              children: [
-                // Gym Programs Section
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          Expanded(
+            child: ListView.builder(
+              itemCount: exercises.length,
+              itemBuilder: (context, index) {
+                return Card(
+                  color: Colors.grey[900],
+                  margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: ListTile(
+                    leading: Container(
+                      width: 50,
+                      height: 50,
+                      color: Colors.grey[800],
+                      child: Icon(Icons.image, color: Colors.grey),
                     ),
-                    child: ListView(
-                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                    title: Text(
+                      exercises[index]['exercise']!,
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildProgramTile(
-                          icon: Icons.fitness_center,
-                          title: 'Strength Training',
-                          subtitle: 'Build muscle and improve overall strength.',
-                          onTap: () => _navigateToProgramDetails(context, 'Strength Training'),
+                        Text(
+                          '${exercises[index]['sets']} sets x ${exercises[index]['reps']} reps - ${exercises[index]['weight']}',
+                          style: TextStyle(color: Colors.grey[400]),
                         ),
-                        _buildProgramTile(
-                          icon: Icons.run_circle,
-                          title: 'Cardio Program',
-                          subtitle: 'Improve endurance and burn calories.',
-                          onTap: () => _navigateToProgramDetails(context, 'Cardio Program'),
-                        ),
-                        _buildProgramTile(
-                          icon: Icons.self_improvement,
-                          title: 'Yoga Sessions',
-                          subtitle: 'Enhance flexibility and reduce stress.',
-                          onTap: () => _navigateToProgramDetails(context, 'Yoga Sessions'),
-                        ),
-                        _buildProgramTile(
-                          icon: Icons.accessibility_new,
-                          title: 'HIIT Workouts',
-                          subtitle: 'High-intensity interval training for fast results.',
-                          onTap: () => _navigateToProgramDetails(context, 'HIIT Workouts'),
+                        Row(
+                          children: [
+                            Icon(Icons.timer, color: Colors.orange, size: 16),
+                            SizedBox(width: 4),
+                            Text(exercises[index]['time']!, style: TextStyle(color: Colors.grey[400])),
+                          ],
                         ),
                       ],
                     ),
+                    trailing: PopupMenuButton<String>(
+                      icon: Icon(Icons.more_vert, color: Colors.white),
+                      onSelected: (value) {
+                        if (value == 'edit') {
+                          _showEditExerciseDialog(context, exercises[index]);
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        PopupMenuItem(value: 'edit', child: Text('Edit')),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                );
+              },
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.all(16.0),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                padding: EdgeInsets.symmetric(vertical: 12, horizontal: 40),
+              ),
+              onPressed: () {},
+              child: Text('STAR WORKOUT', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
             ),
           ),
         ],
@@ -97,140 +114,37 @@ class GymProgramsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildProgramTile({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required Function() onTap,
-  }) {
-    return Card(
-      elevation: 6.0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      margin: EdgeInsets.symmetric(vertical: 10.0),
-      child: ListTile(
-        contentPadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
-        leading: Icon(icon, size: 30, color: Colors.orange.shade600),
-        title: Text(
-          title,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-            color: Colors.orange.shade800,
-          ),
-        ),
-        subtitle: Text(
-          subtitle,
-          style: TextStyle(color: Colors.grey.shade600),
-        ),
-        trailing: Icon(Icons.arrow_forward, color: Colors.orange.shade600),
-        onTap: onTap,
-      ),
-    );
-  }
-
-  void _navigateToProgramDetails(BuildContext context, String program) {
-    final details = programDetails[program]!;
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ProgramDetailsPage(
-          programName: program,
-          exercises: details,
-        ),
-      ),
-    );
-  }
-}
-
-class ProgramDetailsPage extends StatelessWidget {
-  final String programName;
-  final List<Map<String, String>> exercises;
-
-  ProgramDetailsPage({required this.programName, required this.exercises});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(programName),
-        backgroundColor: Colors.orange.shade600,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: exercises.map<Widget>((exercise) {
-            return Card(
-              elevation: 5.0,
-              margin: EdgeInsets.symmetric(vertical: 6.0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: ListTile(
-                contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                title: Text(
-                  exercise['exercise']!,
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-                ),
-                subtitle: Text(
-                  'Sets: ${exercise['sets']} - Reps: ${exercise['reps']} - Time: ${exercise['time']}',
-                  style: TextStyle(color: Colors.grey.shade700),
-                ),
-                onTap: () => _showEditExerciseDialog(context, exercise),
-              ),
-            );
-          }).toList(),
-        ),
-      ),
-    );
-  }
-
-  // Method to show the edit exercise dialog
   void _showEditExerciseDialog(BuildContext context, Map<String, String> exercise) {
-    final TextEditingController setsController = TextEditingController(text: exercise['sets']);
-    final TextEditingController repsController = TextEditingController(text: exercise['reps']);
-    final TextEditingController timeController = TextEditingController(text: exercise['time']);
+    TextEditingController setsController = TextEditingController(text: exercise['sets']);
+    TextEditingController repsController = TextEditingController(text: exercise['reps']);
+    TextEditingController weightController = TextEditingController(text: exercise['weight']);
+    TextEditingController timeController = TextEditingController(text: exercise['time']);
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Edit Exercise: ${exercise['exercise']}'),
+          title: Text('Edit Exercise'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(
-                controller: setsController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: 'Sets'),
-              ),
-              TextField(
-                controller: repsController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: 'Reps'),
-              ),
-              TextField(
-                controller: timeController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: 'Time'),
-              ),
+              TextField(controller: setsController, decoration: InputDecoration(labelText: 'Sets')),
+              TextField(controller: repsController, decoration: InputDecoration(labelText: 'Reps')),
+              TextField(controller: weightController, decoration: InputDecoration(labelText: 'Weight')),
+              TextField(controller: timeController, decoration: InputDecoration(labelText: 'Time')),
             ],
           ),
           actions: [
+            TextButton(onPressed: () => Navigator.pop(context), child: Text('Cancel')),
             TextButton(
               onPressed: () {
-                // Save the changes to the exercise
                 exercise['sets'] = setsController.text;
                 exercise['reps'] = repsController.text;
+                exercise['weight'] = weightController.text;
                 exercise['time'] = timeController.text;
-                Navigator.pop(context); // Close the dialog
+                Navigator.pop(context);
               },
               child: Text('Save'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context), // Close the dialog without saving
-              child: Text('Cancel'),
             ),
           ],
         );
