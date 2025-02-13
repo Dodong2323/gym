@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 class LogsProgressPage extends StatelessWidget {
   final List<Map<String, dynamic>> logs = [
@@ -16,165 +17,187 @@ class LogsProgressPage extends StatelessWidget {
         {"name": "Squats", "sets": "4x20", "reps": [20, 20, 18, 20]},
       ],
     },
-    {
-      "date": "2025-01-06",
-      "exercises": [
-        {"name": "Bicep Curl", "sets": "4x12", "reps": [12, 12, 12, 12]},
-        {"name": "Deadlift", "sets": "3x10", "reps": [10, 10, 10]},
-      ],
-    },
-    {
-      "date": "2025-01-05",
-      "exercises": [
-        {"name": "Leg Press", "sets": "3x15", "reps": [15, 15, 15]},
-        {"name": "Plank", "sets": "3x60 seconds", "reps": []},
-      ],
-    },
   ];
 
   @override
   Widget build(BuildContext context) {
+    List<FlSpot> _generateOverviewChartData() {
+      List<FlSpot> spots = [];
+      for (int i = 0; i < logs.length; i++) {
+        int totalReps = logs[i]["exercises"].fold(
+            0, (sum, exercise) => sum + (exercise["reps"] as List<int>).reduce((a, b) => a + b));
+        spots.add(FlSpot((i + 1).toDouble(), totalReps.toDouble()));
+      }
+      return spots.isNotEmpty ? spots : [const FlSpot(1, 0)];
+    }
+
     return Scaffold(
-      body: Stack(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        title: const Text("Log and Progress", style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.black,
+        elevation: 0,
+      ),
+      body: Column(
         children: [
-          // Header Background Gradient
-          Container(
-            height: 250,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.orange.shade300, Colors.orange.shade800],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Container(
+              height: 200,
+              decoration: BoxDecoration(
+                color: Colors.grey[900],
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [BoxShadow(color: Colors.black54, blurRadius: 10)]
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: LineChart(
+                  LineChartData(
+                    backgroundColor: Colors.grey[900],
+                    titlesData: FlTitlesData(show: false),
+                    borderData: FlBorderData(show: false),
+                    gridData: FlGridData(show: false),
+                    lineBarsData: [
+                      LineChartBarData(
+                        spots: _generateOverviewChartData(),
+                        isCurved: true,
+                        color: Colors.blueAccent,
+                        barWidth: 3,
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),
-          SafeArea(
-            child: Column(
-              children: [
-                // Logs Section
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+          Expanded(
+            child: ListView.builder(
+              itemCount: logs.length,
+              itemBuilder: (context, index) {
+                final log = logs[index];
+                return Card(
+                  color: Colors.grey[850],
+                  margin: const EdgeInsets.all(10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  elevation: 5,
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.all(16),
+                    title: Text(
+                      log['date'],
+                      style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
                     ),
-                    child: ListView.builder(
-                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-                      itemCount: logs.length,
-                      itemBuilder: (context, index) {
-                        final log = logs[index];
-                        return Card(
-                          elevation: 10.0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18),
-                          ),
-                          margin: EdgeInsets.symmetric(vertical: 12.0),
-                          child: ListTile(
-                            contentPadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
-                            title: Text(
-                              log['date']!,
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 22,
-                                color: Colors.orange.shade800,
-                              ),
-                            ),
-                            subtitle: Text(
-                              'Tap to view progress',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey.shade600,
-                              ),
-                            ),
-                            trailing: Icon(Icons.arrow_forward, color: Colors.orange.shade600),
-                            onTap: () => _showDetails(context, log),
-                          ),
-                        );
-                      },
+                    subtitle: const Text("Tap to view progress", style: TextStyle(color: Colors.grey)),
+                    trailing: const Icon(Icons.arrow_forward_ios, color: Colors.orange),
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ProgressGraphPage(log: log)),
                     ),
                   ),
-                ),
-              ],
+                );
+              },
             ),
           ),
         ],
       ),
     );
   }
-
-  void _showDetails(BuildContext context, Map<String, dynamic> log) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Progress for ${log['date']}',
-                  style: TextStyle(
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.orange.shade800,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 20),
-                Column(
-                  children: [
-                    ...log['exercises']!.map<Widget>((exercise) {
-                      return Card(
-                        elevation: 5.0,
-                        margin: EdgeInsets.symmetric(vertical: 6.0),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: ListTile(
-                          contentPadding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                          title: Text(
-                            exercise['name']!,
-                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-                          ),
-                          subtitle: Text(
-                            'Sets: ${exercise['sets']} - Reps: ${exercise['reps']!.join(', ')}',
-                            style: TextStyle(color: Colors.grey.shade700),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ],
-                ),
-                SizedBox(height: 20),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange.shade600,  // Use backgroundColor instead of primary
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    padding: EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-                  ),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Text('Close', style: TextStyle(fontSize: 18)),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
 }
 
-void main() {
-  runApp(MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: LogsProgressPage(),
-  ));
+class ProgressGraphPage extends StatelessWidget {
+  final Map<String, dynamic> log;
+  const ProgressGraphPage({Key? key, required this.log}) : super(key: key);
+
+  List<FlSpot> _generateExerciseChartData() {
+    List<FlSpot> spots = [];
+    List<dynamic> exercises = log["exercises"];
+
+    for (int i = 0; i < exercises.length; i++) {
+      int highestRep = (exercises[i]["reps"] as List<int>).reduce((a, b) => a > b ? a : b);
+      spots.add(FlSpot((i + 1).toDouble(), highestRep.toDouble()));
+    }
+
+    return spots.isNotEmpty ? spots : [const FlSpot(1, 0)];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        title: Text("Progress - ${log['date']}", style: const TextStyle(color: Colors.white)),
+        backgroundColor: Colors.black,
+        elevation: 0,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Exercises for ${log['date']}",
+              style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 10),
+            Expanded(
+              child: ListView.builder(
+                itemCount: log['exercises'].length,
+                itemBuilder: (context, index) {
+                  final exercise = log['exercises'][index];
+                  return Card(
+                    color: Colors.grey[850],
+                    margin: const EdgeInsets.symmetric(vertical: 5),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 5,
+                    child: ListTile(
+                      title: Text(
+                        exercise["name"],
+                        style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Text(
+                        "Sets: ${exercise["sets"]}\nReps: ${exercise["reps"].join(", ")}",
+                        style: const TextStyle(color: Colors.grey),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 20),
+            Center(
+              child: Container(
+                height: 200,
+                decoration: BoxDecoration(
+                  color: Colors.grey[900],
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: LineChart(
+                    LineChartData(
+                      backgroundColor: Colors.grey[900],
+                      titlesData: FlTitlesData(show: false),
+                      borderData: FlBorderData(show: false),
+                      gridData: FlGridData(show: false),
+                      lineBarsData: [
+                        LineChartBarData(
+                          spots: _generateExerciseChartData(),
+                          isCurved: true,
+                          color: Colors.purpleAccent,
+                          barWidth: 3,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

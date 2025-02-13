@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'user_dashboard.dart';
 import 'coach_dashboard.dart';
-import 'SignUpScreen.dart.dart';
 import 'guest.dart';
-
+import 'Email.dart';
+import 'SignUpScreen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -34,6 +34,40 @@ class _LoginScreenState extends State<LoginScreen>
   late Animation<Offset> _slideAnimation;
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+
+  Widget _buildButton({
+  required String text,
+  required Color color,
+  required Color textColor,
+  VoidCallback? onPressed,
+  IconData? icon,
+}) {
+  return ElevatedButton(
+    style: ElevatedButton.styleFrom(
+      backgroundColor: color,
+      foregroundColor: textColor,
+      minimumSize: const Size(double.infinity, 50),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+    ),
+    onPressed: onPressed,
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (icon != null) ...[
+          Icon(icon, color: textColor),
+          const SizedBox(width: 10),
+        ],
+        Text(
+          text,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+      ],
+    ),
+  );
+}
+
 
   @override
   void initState() {
@@ -82,6 +116,13 @@ class _LoginScreenState extends State<LoginScreen>
         const SnackBar(content: Text("Invalid email or password!")),
       );
     }
+  }
+
+  void navigateToEmailLogin() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ContinueWithEmailScreen()),
+    );
   }
 
   @override
@@ -145,9 +186,7 @@ class _LoginScreenState extends State<LoginScreen>
                   ),
                 ),
                 const SizedBox(height: 20),
-
                 showLogin ? _buildLoginFields() : _buildMainView(),
-
                 const SizedBox(height: 20),
                 const Text(
                   "By continuing, you agree to Fitness's Terms & Conditions and Privacy Policy",
@@ -164,44 +203,43 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   Widget _buildMainView() {
-  return Column(
-    key: const ValueKey(1),
-    children: [
-      _buildButton(
-        text: "Continue with Email",
-        color: Colors.white,
-        textColor: Colors.black,
-        icon: Icons.mail,
-        onPressed: () {},
-      ),
-      const SizedBox(height: 10),
-      _buildButton(
-        text: "Login",
-        color: Colors.blue,
-        textColor: Colors.white,
-        onPressed: toggleLoginView,
-      ),
-      const SizedBox(height: 10),
-      const Text(
-        "or",
-        style: TextStyle(color: Colors.white, fontSize: 16),
-      ),
-      const SizedBox(height: 10),
-      _buildButton(
-        text: "Continue as a Guest",
-        color: Colors.orange,
-        textColor: Colors.white,
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => GuestScreen()),
-          );
-        },
-      ),
-    ],
-  );
-}
-
+    return Column(
+      key: const ValueKey(1),
+      children: [
+        _buildButton(
+          text: "Continue with Email",
+          color: Colors.white,
+          textColor: Colors.black,
+          icon: Icons.mail,
+          onPressed: navigateToEmailLogin,
+        ),
+        const SizedBox(height: 10),
+        _buildButton(
+          text: "Login",
+          color: Colors.blue,
+          textColor: Colors.white,
+          onPressed: toggleLoginView,
+        ),
+        const SizedBox(height: 10),
+        const Text(
+          "or",
+          style: TextStyle(color: Colors.white, fontSize: 16),
+        ),
+        const SizedBox(height: 10),
+        _buildButton(
+          text: "Continue as a Guest",
+          color: Colors.orange,
+          textColor: Colors.white,
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => GuestScreen()),
+            );
+          },
+        ),
+      ],
+    );
+  }
 
   Widget _buildLoginFields() {
     return Column(
@@ -238,17 +276,13 @@ class _LoginScreenState extends State<LoginScreen>
           ),
         ),
         const SizedBox(height: 20),
-
         _buildButton(
-          text: "Login",
+          text: "Login", 
           color: Colors.orange,
           textColor: Colors.white,
           onPressed: loginUser,
         ),
-        
         const SizedBox(height: 10),
-
-        // Sign Up Button
         TextButton(
           onPressed: () {
             Navigator.push(
@@ -265,34 +299,6 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
-  Widget _buildButton({
-    required String text,
-    required Color color,
-    required Color textColor,
-    VoidCallback? onPressed,
-    IconData? icon,
-  }) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        foregroundColor: textColor,
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-      ),
-      onPressed: onPressed,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          if (icon != null) Icon(icon, color: textColor),
-          if (icon != null) const SizedBox(width: 10),
-          Text(text),
-        ],
-      ),
-    );
-  }
-
   Widget _buildTextField({
     required TextEditingController controller,
     required String hintText,
@@ -301,16 +307,17 @@ class _LoginScreenState extends State<LoginScreen>
   }) {
     return TextField(
       controller: controller,
-      obscureText: isPassword ? obscurePassword : false,
+      obscureText: isPassword,
       style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
-        filled: true,
-        fillColor: Colors.black.withOpacity(0.3),
         hintText: hintText,
         hintStyle: const TextStyle(color: Colors.white54),
-        prefixIcon: Icon(icon, color: Colors.orange),
+        prefixIcon: Icon(icon, color: Colors.white),
+        filled: true,
+        fillColor: Colors.white10,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide.none,
         ),
       ),
     );
