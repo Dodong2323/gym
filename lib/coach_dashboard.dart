@@ -49,7 +49,7 @@ class _CoachDashboardState extends State<CoachDashboard> {
                   ),
                 );
               },
-              backgroundColor: Colors.orange,
+              backgroundColor: Colors.red,
               mini: true,
               child: Icon(Icons.notifications),
             ),
