@@ -37,6 +37,13 @@ class _LoginScreenState extends State<LoginScreen>
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
+  int failedAttempts = 0;
+  bool isButtonDisabled = false;
+  int countdownTime = 0;
+  bool isAccountLocked = false;
+  bool _isLocked = false;
+  int totalAttempts = 5;
+
   @override
   void initState() {
     super.initState();
@@ -56,7 +63,11 @@ class _LoginScreenState extends State<LoginScreen>
     });
   }
 
-void loginUser() async {
+ void loginUser() async {
+  if (isButtonDisabled || isAccountLocked) {
+    return;
+  }
+
   String email = emailController.text.trim();
   String password = passwordController.text.trim();
 
@@ -81,18 +92,34 @@ void loginUser() async {
 
   try {
     var response = await http.post(url, body: requestBody);
-    
+
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
 
+      if (data is Map && data.containsKey("error")) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(data["error"])),
+        );
+        return;
+      }
+
       if (data != 0) {
         String role = data['Role'];
-        
+
         if (role == 'members') {
-          Navigator.pushReplacement(
+          if(data['user_failed_attempts'] == 1){
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Your account is Locked")),
+            );
+            setState(() {
+              _isLocked = true;
+            });
+          } else{
+                      Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => UserDashboard()),
           );
+          }
         } else if (role == 'coach') {
           Navigator.pushReplacement(
             context,
@@ -104,6 +131,10 @@ void loginUser() async {
           );
         }
       } else {
+        setState(() {
+          failedAttempts++;
+        });
+        handleFailedAttempts();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Invalid email or password!")),
         );
@@ -120,6 +151,71 @@ void loginUser() async {
   }
 }
 
+void updateFailedAttempts() async {
+  try {
+    var url = Uri.parse('http://localhost/gym_php/login.php');
+
+    Map<String, dynamic> jsonData = {
+      "user_email": emailController.text,
+      "user_failed_attempts": 1
+    };
+
+    Map<String, String> requestBody = {
+      "operation": "updateFailedAttempts",
+      "json": jsonEncode(jsonData),
+    };
+
+    var response = await http.post(url, body: requestBody);
+
+    if (response.statusCode == 200) {
+      print("Failed attempts updated successfully.");
+    }
+  } catch (e) {
+    print(e);
+  }
+}
+
+void handleFailedAttempts() {
+  if (failedAttempts == 5 && totalAttempts == 5) {
+    setState(() {
+      isButtonDisabled = true;
+      totalAttempts = 3; // Reset total attempts to 3
+      failedAttempts = 0; // Reset failed attempts counter
+      countdownTime = 3; // 2 minutes
+    });
+    startCountdown();
+  } else if (failedAttempts == 3 && totalAttempts == 3) {
+    setState(() {
+      isButtonDisabled = true;
+      totalAttempts = 2; // Reset total attempts to 2
+      failedAttempts = 0; // Reset failed attempts counter
+      countdownTime = 3; // 5 minutes
+    });
+    startCountdown();
+  } else if (failedAttempts == 2 && totalAttempts == 2) {
+    setState(() {
+      isAccountLocked = true;
+    });
+    updateFailedAttempts(); // Call the function to update failed attempts in the database
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Account temporarily locked. Contact admin.")),
+    );
+  }
+}
+  void startCountdown() {
+    Future.delayed(const Duration(seconds: 1), () {
+      if (countdownTime > 0) {
+        setState(() {
+          countdownTime--;
+        });
+        startCountdown();
+      } else {
+        setState(() {
+          isButtonDisabled = false;
+        });
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -212,7 +308,6 @@ void loginUser() async {
       ),
     );
   }
-  
 
   Widget _buildMainView() {
     return Column(
@@ -253,96 +348,108 @@ void loginUser() async {
     );
   }
 
-Widget _buildLoginFields() {
-  return Column(
-    key: const ValueKey(2),
-    children: [
-      Column(
-        children: [
-          TextFormField(
-            controller: emailController,
-            decoration: InputDecoration(
-              hintText: "Email Address",
-              prefixIcon: const Icon(Icons.mail),
-              filled: true,
-              fillColor: Colors.white,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide.none,
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          TextFormField(
-            controller: passwordController,
-            obscureText: obscurePassword,
-            decoration: InputDecoration(
-              hintText: "Password",
-              prefixIcon: const Icon(Icons.lock),
-              filled: true,
-              fillColor: Colors.white,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide.none,
-              ),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  obscurePassword ? Icons.visibility_off : Icons.visibility,
+  Widget _buildLoginFields() {
+    return Column(
+      key: const ValueKey(2),
+      children: [
+        Column(
+          children: [
+            TextFormField(
+              controller: emailController,
+              decoration: InputDecoration(
+                hintText: "Email Address",
+                prefixIcon: const Icon(Icons.mail),
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none,
                 ),
-                onPressed: () {
-                  setState(() {
-                    obscurePassword = !obscurePassword;
-                  });
-                },
               ),
             ),
-          ),
-          const Align(
-            alignment: Alignment.centerRight,
-            child: Padding(
-              padding: EdgeInsets.only(bottom: 10, top: 5),
-              child: Text(
-                "Forgot Password?",
-                style: TextStyle(color: Colors.white),
+            const SizedBox(height: 10),
+            TextFormField(
+              controller: passwordController,
+              obscureText: obscurePassword,
+              decoration: InputDecoration(
+                hintText: "Password",
+                prefixIcon: const Icon(Icons.lock),
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none,
+                ),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    obscurePassword ? Icons.visibility_off : Icons.visibility,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      obscurePassword = !obscurePassword;
+                    });
+                  },
+                ),
               ),
             ),
+            const Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: EdgeInsets.only(bottom: 10, top: 5),
+                child: Text(
+                  "Forgot Password?",
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        if (isButtonDisabled)
+          Text(
+            "Try again in $countdownTime seconds",
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ],
-      ),
-      const SizedBox(height: 20),
-      ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.orange,
-          foregroundColor: Colors.white,
-          minimumSize: const Size(double.infinity, 50),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+        const SizedBox(height: 10),
+        Visibility(
+          visible: !_isLocked,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              foregroundColor: Colors.white,
+              minimumSize: const Size(double.infinity, 50),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            onPressed: isButtonDisabled || isAccountLocked ? null : loginUser,
+            child: const Text("Login", style: TextStyle(fontSize: 16)),
           ),
         ),
-        onPressed: loginUser,
-        child: const Text("Login", style: TextStyle(fontSize: 16)),
-      ),
-      const SizedBox(height: 10),
-      TextButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => SignUpScreen()),
-          );
-        },
-        child: const Text(
-          "You don't have an account? Sign up",
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.orange,
-            fontWeight: FontWeight.bold,
+        const SizedBox(height: 10),
+        TextButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => SignUpScreen()),
+            );
+          },
+          child: const Text(
+            "You don't have an account? Sign up",
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.orange,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
-      ),
-    ],
-  );
-}
-
+      ],
+    );
+  }
 
   Widget _buildButton({
     required String text,
