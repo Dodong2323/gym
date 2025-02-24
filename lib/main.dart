@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'user_dashboard.dart';
 import 'coach_dashboard.dart';
 import 'guest.dart';
@@ -35,40 +37,6 @@ class _LoginScreenState extends State<LoginScreen>
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  Widget _buildButton({
-  required String text,
-  required Color color,
-  required Color textColor,
-  VoidCallback? onPressed,
-  IconData? icon,
-}) {
-  return ElevatedButton(
-    style: ElevatedButton.styleFrom(
-      backgroundColor: color,
-      foregroundColor: textColor,
-      minimumSize: const Size(double.infinity, 50),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-    ),
-    onPressed: onPressed,
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        if (icon != null) ...[
-          Icon(icon, color: textColor),
-          const SizedBox(width: 10),
-        ],
-        Text(
-          text,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-      ],
-    ),
-  );
-}
-
-
   @override
   void initState() {
     super.initState();
@@ -84,10 +52,74 @@ class _LoginScreenState extends State<LoginScreen>
 
   void toggleLoginView() {
     setState(() {
-      showLogin = true;
+      showLogin = !showLogin;
     });
-    _controller.forward();
   }
+
+void loginUser() async {
+  String email = emailController.text.trim();
+  String password = passwordController.text.trim();
+
+  if (email.isEmpty || password.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Please fill in all fields")),
+    );
+    return;
+  }
+
+  var url = Uri.parse('http://localhost/gym_php/login.php');
+
+  Map<String, dynamic> jsonData = {
+    "username": email,
+    "password": password,
+  };
+
+  Map<String, String> requestBody = {
+    "operation": "login",
+    "json": jsonEncode(jsonData),
+  };
+
+  try {
+    var response = await http.post(url, body: requestBody);
+    
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body);
+
+      if (data != 0) {
+        String role = data['Role'];
+        
+        if (role == 'members') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => UserDashboard()),
+          );
+        } else if (role == 'coach') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => CoachDashboard()),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Access Denied")),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Invalid email or password!")),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Server error. Try again later.")),
+      );
+    }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Error: ${e.toString()}")),
+    );
+  }
+}
+
 
   @override
   void dispose() {
@@ -95,27 +127,6 @@ class _LoginScreenState extends State<LoginScreen>
     emailController.dispose();
     passwordController.dispose();
     super.dispose();
-  }
-
-  void loginUser() {
-    String email = emailController.text.trim();
-    String password = passwordController.text.trim();
-
-    if (email == "user123" && password == "user123") {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => UserDashboard()),
-      );
-    } else if (email == "coach123" && password == "coach123") {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => CoachDashboard()),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Invalid email or password!")),
-      );
-    }
   }
 
   void navigateToEmailLogin() {
@@ -201,6 +212,7 @@ class _LoginScreenState extends State<LoginScreen>
       ),
     );
   }
+  
 
   Widget _buildMainView() {
     return Column(
@@ -241,85 +253,116 @@ class _LoginScreenState extends State<LoginScreen>
     );
   }
 
-  Widget _buildLoginFields() {
-    return Column(
-      key: const ValueKey(2),
-      children: [
-        SlideTransition(
-          position: _slideAnimation,
-          child: Column(
-            children: [
-              _buildTextField(
-                controller: emailController,
-                hintText: "Email Address",
-                icon: Icons.mail,
-                isPassword: false,
+Widget _buildLoginFields() {
+  return Column(
+    key: const ValueKey(2),
+    children: [
+      Column(
+        children: [
+          TextFormField(
+            controller: emailController,
+            decoration: InputDecoration(
+              hintText: "Email Address",
+              prefixIcon: const Icon(Icons.mail),
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none,
               ),
-              const SizedBox(height: 10),
-              _buildTextField(
-                controller: passwordController,
-                hintText: "Password",
-                icon: Icons.lock,
-                isPassword: true,
+            ),
+          ),
+          const SizedBox(height: 10),
+          TextFormField(
+            controller: passwordController,
+            obscureText: obscurePassword,
+            decoration: InputDecoration(
+              hintText: "Password",
+              prefixIcon: const Icon(Icons.lock),
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none,
               ),
-              const Align(
-                alignment: Alignment.centerRight,
-                child: Padding(
-                  padding: EdgeInsets.only(bottom: 10),
-                  child: Text(
-                    "Forgot Password?",
-                    style: TextStyle(color: Colors.white),
-                  ),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  obscurePassword ? Icons.visibility_off : Icons.visibility,
                 ),
+                onPressed: () {
+                  setState(() {
+                    obscurePassword = !obscurePassword;
+                  });
+                },
               ),
-            ],
+            ),
+          ),
+          const Align(
+            alignment: Alignment.centerRight,
+            child: Padding(
+              padding: EdgeInsets.only(bottom: 10, top: 5),
+              child: Text(
+                "Forgot Password?",
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ),
+        ],
+      ),
+      const SizedBox(height: 20),
+      ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.orange,
+          foregroundColor: Colors.white,
+          minimumSize: const Size(double.infinity, 50),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
           ),
         ),
-        const SizedBox(height: 20),
-        _buildButton(
-          text: "Login", 
-          color: Colors.orange,
-          textColor: Colors.white,
-          onPressed: loginUser,
-        ),
-        const SizedBox(height: 10),
-        TextButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => SignUpScreen()),
-            );
-          },
-          child: const Text(
-            "You don't have an account? Sign up",
-            style: TextStyle(fontSize: 14, color: Colors.orange, fontWeight: FontWeight.bold),
+        onPressed: loginUser,
+        child: const Text("Login", style: TextStyle(fontSize: 16)),
+      ),
+      const SizedBox(height: 10),
+      TextButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => SignUpScreen()),
+          );
+        },
+        child: const Text(
+          "You don't have an account? Sign up",
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.orange,
+            fontWeight: FontWeight.bold,
           ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String hintText,
-    required IconData icon,
-    required bool isPassword,
-  }) {
-    return TextField(
-      controller: controller,
-      obscureText: isPassword,
-      style: const TextStyle(color: Colors.white),
-      decoration: InputDecoration(
-        hintText: hintText,
-        hintStyle: const TextStyle(color: Colors.white54),
-        prefixIcon: Icon(icon, color: Colors.white),
-        filled: true,
-        fillColor: Colors.white10,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide.none,
         ),
       ),
+    ],
+  );
+}
+
+
+  Widget _buildButton({
+    required String text,
+    required Color color,
+    required Color textColor,
+    IconData? icon,
+    required VoidCallback onPressed,
+  }) {
+    return ElevatedButton.icon(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        foregroundColor: textColor,
+        minimumSize: const Size(double.infinity, 50),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+      icon: icon != null ? Icon(icon, color: textColor) : const SizedBox(),
+      label: Text(text, style: TextStyle(color: textColor, fontSize: 16)),
+      onPressed: onPressed,
     );
   }
 }

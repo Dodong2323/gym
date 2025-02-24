@@ -1,202 +1,267 @@
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
 
 class LogsProgressPage extends StatelessWidget {
   final List<Map<String, dynamic>> logs = [
     {
-      "date": "2025-01-08",
+      "date": "Feb 12",
+      "title": "Lower Day - Feb 12",
+      "category": "Lower Body",
+      "warmups": [
+        {
+          "name": "Warmup Squat",
+          "sets": "1x20",
+          "reps": [20]
+        },
+        {
+          "name": "Warmup Hack Squat",
+          "sets": "1x16",
+          "weight": "25kg",
+          "reps": [16]
+        },
+      ],
       "exercises": [
-        {"name": "Lateral Raise", "sets": "3x15", "reps": [12, 12, 14]},
-        {"name": "Push-up", "sets": "3x20", "reps": [20, 20, 20]},
+        {
+          "name": "Hack Squat",
+          "sets": "2x5",
+          "weight": "65kg, 70kg each side",
+          "reps": [5, 6]
+        },
+        {
+          "name": "Smith RDL",
+          "sets": "2x7",
+          "weight": "30kg",
+          "reps": [7, 7]
+        },
+        {
+          "name": "Thigh Clapper",
+          "sets": "2x7",
+          "weight": "12th line",
+          "reps": [7, 5]
+        },
+        {
+          "name": "Leg Extension",
+          "sets": "2x10",
+          "weight": "+10kg, +15kg",
+          "reps": [10, 8]
+        },
+        {
+          "name": "Single Left Extension",
+          "sets": "1x6",
+          "weight": "55kg",
+          "reps": [6]
+        },
+        {
+          "name": "DB Shrugs",
+          "sets": "2x7",
+          "weight": "45kg",
+          "reps": [7, 9]
+        },
+        {
+          "name": "Calf Raises",
+          "sets": "2x9",
+          "weight": "90kg each side",
+          "reps": [9, 9]
+        },
+        {
+          "name": "Single Calf Raises",
+          "sets": "1x3",
+          "weight": "50kg each side",
+          "reps": [3]
+        },
       ],
     },
     {
-      "date": "2025-01-07",
+      "date": "Feb 13",
+      "title": "Upper Day - Feb 13",
+      "category": "Upper Body",
+      "warmups": [
+        {
+          "name": "Warmup Machine Flies",
+          "sets": "1x13",
+          "weight": "9th line",
+          "reps": [13]
+        },
+        {
+          "name": "Warmup Incline DB Press",
+          "sets": "1x17",
+          "weight": "15kg",
+          "reps": [17]
+        },
+        {
+          "name": "Warmup Lat Pullover",
+          "sets": "1x13",
+          "weight": "7th line",
+          "reps": [13]
+        },
+        {
+          "name": "Warmup Cable Mid Row",
+          "sets": "1x13",
+          "weight": "30kg",
+          "reps": [13]
+        },
+      ],
       "exercises": [
-        {"name": "Lateral Raise", "sets": "3x15", "reps": [10, 11, 12]},
-        {"name": "Squats", "sets": "4x20", "reps": [20, 20, 18, 20]},
+        {
+          "name": "Incline DB Chest Press",
+          "sets": "2x6",
+          "weight": "30kg",
+          "reps": [6, 6]
+        },
+        {
+          "name": "Incline Machine Flies",
+          "sets": "1x6",
+          "weight": "27.5kg each side",
+          "reps": [6]
+        },
+        {
+          "name": "DB Shoulder Press",
+          "sets": "1x4",
+          "weight": "27.5kg",
+          "reps": [4]
+        },
+        {
+          "name": "Cable Mid Grip Row",
+          "sets": "2x7, 10",
+          "weight": "65kg",
+          "reps": [7, 10]
+        },
+        {
+          "name": "Cable Single Lat Pullover",
+          "sets": "1x10 left, 10 right",
+          "weight": "35kg",
+          "reps": [10, 10]
+        },
+        {
+          "name": "Cable Lat Pullovers",
+          "sets": "1x10",
+          "weight": "10th line",
+          "reps": [10]
+        },
+        {
+          "name": "Reverse Flies",
+          "sets": "2x11, 10",
+          "weight": "11th line",
+          "reps": [11, 10]
+        },
+        {
+          "name": "Lateral Raises",
+          "sets": "2x11, 10",
+          "weight": "45kg",
+          "reps": [11, 10]
+        },
+        {
+          "name": "Carter Extensions",
+          "sets": "2x9, 5 left and 8, 4 right",
+          "weight": "5th line, 6th line",
+          "reps": [9, 5, 8, 4]
+        },
+        {
+          "name": "Bicep Curl",
+          "sets": "2x11, 9",
+          "weight": "30kg",
+          "reps": [11, 9]
+        },
       ],
     },
   ];
 
+  LogsProgressPage({super.key});
+
   @override
   Widget build(BuildContext context) {
-    List<FlSpot> _generateOverviewChartData() {
-      List<FlSpot> spots = [];
-      for (int i = 0; i < logs.length; i++) {
-        int totalReps = logs[i]["exercises"].fold(
-            0, (sum, exercise) => sum + (exercise["reps"] as List<int>).reduce((a, b) => a + b));
-        spots.add(FlSpot((i + 1).toDouble(), totalReps.toDouble()));
-      }
-      return spots.isNotEmpty ? spots : [const FlSpot(1, 0)];
-    }
-
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: const Text("Log and Progress", style: TextStyle(color: Colors.white)),
+        title: const Text("Log and Progress",
+            style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.black,
         elevation: 0,
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Container(
-              height: 200,
-              decoration: BoxDecoration(
-                color: Colors.grey[900],
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [BoxShadow(color: Colors.black54, blurRadius: 10)]
+      body: ListView.builder(
+        itemCount: logs.length,
+        itemBuilder: (context, index) {
+          final log = logs[index];
+          return Card(
+            color: Colors.grey[850],
+            margin: const EdgeInsets.all(10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            elevation: 5,
+            child: ListTile(
+              contentPadding: const EdgeInsets.all(16),
+              title: Text(
+                log['title'],
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold),
               ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: LineChart(
-                  LineChartData(
-                    backgroundColor: Colors.grey[900],
-                    titlesData: FlTitlesData(show: false),
-                    borderData: FlBorderData(show: false),
-                    gridData: FlGridData(show: false),
-                    lineBarsData: [
-                      LineChartBarData(
-                        spots: _generateOverviewChartData(),
-                        isCurved: true,
-                        color: Colors.blueAccent,
-                        barWidth: 3,
-                      ),
-                    ],
-                  ),
-                ),
+              subtitle: const Text("Tap to view progress",
+                  style: TextStyle(color: Colors.grey)),
+              trailing:
+                  const Icon(Icons.arrow_forward_ios, color: Colors.orange),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => ProgressDetailPage(log: log)),
               ),
             ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: logs.length,
-              itemBuilder: (context, index) {
-                final log = logs[index];
-                return Card(
-                  color: Colors.grey[850],
-                  margin: const EdgeInsets.all(10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  elevation: 5,
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.all(16),
-                    title: Text(
-                      log['date'],
-                      style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: const Text("Tap to view progress", style: TextStyle(color: Colors.grey)),
-                    trailing: const Icon(Icons.arrow_forward_ios, color: Colors.orange),
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => ProgressGraphPage(log: log)),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
 }
 
-class ProgressGraphPage extends StatelessWidget {
+class ProgressDetailPage extends StatelessWidget {
   final Map<String, dynamic> log;
-  const ProgressGraphPage({Key? key, required this.log}) : super(key: key);
-
-  List<FlSpot> _generateExerciseChartData() {
-    List<FlSpot> spots = [];
-    List<dynamic> exercises = log["exercises"];
-
-    for (int i = 0; i < exercises.length; i++) {
-      int highestRep = (exercises[i]["reps"] as List<int>).reduce((a, b) => a > b ? a : b);
-      spots.add(FlSpot((i + 1).toDouble(), highestRep.toDouble()));
-    }
-
-    return spots.isNotEmpty ? spots : [const FlSpot(1, 0)];
-  }
+  const ProgressDetailPage({super.key, required this.log});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text("Progress - ${log['date']}", style: const TextStyle(color: Colors.white)),
+        title: Text("${log['category']} - ${log['date']}",
+            style: const TextStyle(color: Colors.white)),
         backgroundColor: Colors.black,
         elevation: 0,
       ),
-      body: Padding(
+      body: ListView(
         padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Exercises for ${log['date']}",
-              style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            Expanded(
-              child: ListView.builder(
-                itemCount: log['exercises'].length,
-                itemBuilder: (context, index) {
-                  final exercise = log['exercises'][index];
-                  return Card(
-                    color: Colors.grey[850],
-                    margin: const EdgeInsets.symmetric(vertical: 5),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 5,
-                    child: ListTile(
-                      title: Text(
-                        exercise["name"],
-                        style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: Text(
-                        "Sets: ${exercise["sets"]}\nReps: ${exercise["reps"].join(", ")}",
-                        style: const TextStyle(color: Colors.grey),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 20),
-            Center(
-              child: Container(
-                height: 200,
-                decoration: BoxDecoration(
-                  color: Colors.grey[900],
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: LineChart(
-                    LineChartData(
-                      backgroundColor: Colors.grey[900],
-                      titlesData: FlTitlesData(show: false),
-                      borderData: FlBorderData(show: false),
-                      gridData: FlGridData(show: false),
-                      lineBarsData: [
-                        LineChartBarData(
-                          spots: _generateExerciseChartData(),
-                          isCurved: true,
-                          color: Colors.purpleAccent,
-                          barWidth: 3,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+        children: [
+          Text("Exercises for ${log['date']}",
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold)),
+          ...log['warmups']
+              .map<Widget>((exercise) => _buildExerciseCard(exercise))
+              .toList(),
+          ...log['exercises']
+              .map<Widget>((exercise) => _buildExerciseCard(exercise))
+              .toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExerciseCard(Map<String, dynamic> exercise) {
+    return Card(
+      color: Colors.grey[850],
+      margin: const EdgeInsets.symmetric(vertical: 5),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 5,
+      child: ListTile(
+        title: Text(exercise["name"],
+            style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold)),
+        subtitle: Text(
+            "Sets: ${exercise["sets"]}\nReps: ${exercise["reps"].join(", ")}${exercise.containsKey("weight") ? "\nWeight: ${exercise["weight"]}" : ""}",
+            style: const TextStyle(color: Colors.grey)),
       ),
     );
   }
