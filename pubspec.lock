@@ -107,19 +107,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_web_plugins:
-    dependency: transitive
-    description: flutter
-    source: sdk
-    version: "0.0.0"
-  g_recaptcha_v3:
+  get:
     dependency: "direct main"
     description:
-      name: g_recaptcha_v3
-      sha256: "1c3da390e70310e19cd7932eee473b15f822c29f6b86999bb539858c665364b8"
+      name: get
+      sha256: c79eeb4339f1f3deffd9ec912f8a923834bec55f7b49c9e882b8fef2c139d425
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.0"
+    version: "4.7.2"
   http:
     dependency: "direct main"
     description:
