@@ -1,5 +1,21 @@
 import 'package:flutter/material.dart';
 
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: GuestScreen(),
+    );
+  }
+}
+
 class GuestScreen extends StatefulWidget {
   @override
   _GuestScreenState createState() => _GuestScreenState();
@@ -104,7 +120,8 @@ class _GuestScreenState extends State<GuestScreen> {
           ? () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => PersonalInformationScreen()),
+                MaterialPageRoute(
+                    builder: (context) => PersonalInformationScreen()),
               );
             }
           : null,
@@ -167,12 +184,12 @@ class PersonalInformationScreen extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 50),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 14, horizontal: 50),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                // Updated to navigate to the final QR Code screen (Step 3)
                 onPressed: () {
                   Navigator.push(
                     context,
@@ -208,33 +225,7 @@ class PersonalInformationScreen extends StatelessWidget {
   }
 }
 
-// Final Step: QR Code Screen (Step 3)
 class QrCodeScreen extends StatelessWidget {
-  void _showPrivacyPolicy(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.black,
-        title: const Text(
-          "Privacy Policy",
-          style: TextStyle(color: Colors.orange),
-        ),
-        content: SingleChildScrollView(
-          child: Text(
-            "Your uploaded privacy policy content here.",
-            style: const TextStyle(color: Colors.white70),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Close", style: TextStyle(color: Colors.orange)),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -251,7 +242,12 @@ class QrCodeScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.privacy_tip, color: Colors.orange),
-            onPressed: () => _showPrivacyPolicy(context),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => PrivacyPolicyScreen()),
+              );
+            },
           ),
         ],
       ),
@@ -305,7 +301,8 @@ class QrCodeScreen extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 50),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 14, horizontal: 50),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -335,7 +332,71 @@ class QrCodeScreen extends StatelessWidget {
   }
 }
 
-// Placeholder for progress indicator widget
+class PrivacyPolicyScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Background Image
+          Image.asset(
+            'assets/images/gym_background.jpg', // Replace with your image path
+            fit: BoxFit.cover,
+          ),
+          // Dark overlay
+          Container(
+            color: Colors.black.withOpacity(0.5),
+          ),
+          // Content
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.orange),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  "Privacy Policy",
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.orange,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  "Chergy gym rules.",
+                  style: TextStyle(fontSize: 18, color: Colors.white),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  "1. Conserve each on how to use the gym props.\n"
+                  "2. Use facilities and equipment at your own risk.\n"
+                  "3. Retourments to rack after use.\n"
+                  "4. Initiate under the age of 16 must have parents or guardians permission.\n"
+                  "5. Report any damages to the management immediately DO NOT USE.\n"
+                  "6. STOP exercising if you feel pain, discomfort, nausea, dizziness or short-ness of breath.\n"
+                  "7. Wear proper gym clothing. NO LIPPERS.\n"
+                  "8. NO LITTERING.\n"
+                  "9. NO SMOKING.\n"
+                  "10. NO LITTERING.\n"
+                  "11. Use provided sanitizer stations.\n"
+                  "12. Please be COURTEOUS AND RESPECTFUL of other gym users.",
+                  style: TextStyle(fontSize: 16, color: Colors.white70),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _ProgressIndicator extends StatelessWidget {
   final int step;
   const _ProgressIndicator(this.step);
@@ -358,4 +419,3 @@ class _ProgressIndicator extends StatelessWidget {
     );
   }
 }
-

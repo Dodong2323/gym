@@ -6,6 +6,7 @@ import 'coach_dashboard.dart';
 import 'guest.dart';
 import 'Email.dart';
 import 'SignUpScreen.dart';
+import 'forgot_pass.dart';
 import 'package:get/get.dart';
 import 'package:flutter/gestures.dart';
 
@@ -27,6 +28,8 @@ class MyApp extends StatelessWidget {
         '/guest': (context) => GuestScreen(),
         '/emailLogin': (context) => ContinueWithEmailScreen(),
         '/signUp': (context) => SignUpScreen(),
+        '/forgotPassword': (context) =>
+            ForgotPasswordScreen(), // Add Forgot Password route
       },
     );
   }
@@ -520,13 +523,18 @@ class _LoginScreenState extends State<LoginScreen>
                     ),
                   ),
                 ),
-                const Align(
+                Align(
                   alignment: Alignment.centerRight,
                   child: Padding(
                     padding: EdgeInsets.only(bottom: 10, top: 5),
-                    child: Text(
-                      "Forgot Password?",
-                      style: TextStyle(color: Colors.white),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(context, '/forgotPassword');
+                      },
+                      child: Text(
+                        "Forgot Password?",
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ),
                 ),
