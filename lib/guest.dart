@@ -24,6 +24,11 @@ class GuestScreen extends StatefulWidget {
 class _GuestScreenState extends State<GuestScreen> {
   String? selectedOption;
 
+  // Function to handle the skip action
+  void _handleSkip() {
+    Navigator.popUntil(context, (route) => route.isFirst);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,7 +42,7 @@ class _GuestScreenState extends State<GuestScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () {}, // Add Skip functionality here
+            onPressed: _handleSkip, // Use the skip function here
             child: const Text("Skip", style: TextStyle(color: Colors.orange)),
           ),
         ],
