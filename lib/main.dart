@@ -28,7 +28,8 @@ class MyApp extends StatelessWidget {
         '/guest': (context) => GuestScreen(),
         '/emailLogin': (context) => ContinueWithEmailScreen(),
         '/signUp': (context) => SignUpScreen(),
-        '/forgotPassword': (context) => ForgotPasswordScreen(),
+        '/forgotPassword': (context) =>
+            ForgotPasswordScreen(), // Add Forgot Password route
       },
     );
   }
@@ -66,8 +67,8 @@ class _LoginScreenState extends State<LoginScreen>
       vsync: this,
     );
     _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 1),
-      end: Offset.zero,
+      begin: const Offset(0, 1), // Start from the bottom
+      end: Offset.zero, // End at the center
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     _colorAnimation = ColorTween(
@@ -91,9 +92,9 @@ class _LoginScreenState extends State<LoginScreen>
       showLogin = !showLogin;
     });
     if (showLogin) {
-      _controller.forward();
+      _controller.forward(); // Start the slide-up animation
     } else {
-      _controller.reverse();
+      _controller.reverse(); // Reverse the animation
     }
   }
 
@@ -115,26 +116,12 @@ class _LoginScreenState extends State<LoginScreen>
       );
       return;
     }
-  }
-
-  void _handleRecaptcha(String response) async {
-    if (response == null || response.isEmpty) {
-      Get.snackbar(
-        "Error",
-        "Please complete the reCAPTCHA",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-      return;
-    }
 
     var url = Uri.parse('http://localhost/gym_php/login.php');
 
     Map<String, dynamic> jsonData = {
-      "username": emailController.text.trim(),
-      "password": passwordController.text.trim(),
-      "recaptchaResponse": response,
+      "username": email,
+      "password": password,
     };
 
     Map<String, String> requestBody = {
@@ -249,24 +236,24 @@ class _LoginScreenState extends State<LoginScreen>
     if (failedAttempts == 5 && totalAttempts == 5) {
       setState(() {
         isButtonDisabled = true;
-        totalAttempts = 3;
-        failedAttempts = 0;
-        countdownTime = 3;
+        totalAttempts = 3; // Reset total attempts to 3
+        failedAttempts = 0; // Reset failed attempts counter
+        countdownTime = 3; // 2 minutes
       });
       startCountdown();
     } else if (failedAttempts == 3 && totalAttempts == 3) {
       setState(() {
         isButtonDisabled = true;
-        totalAttempts = 2;
-        failedAttempts = 0;
-        countdownTime = 3;
+        totalAttempts = 2; // Reset total attempts to 2
+        failedAttempts = 0; // Reset failed attempts counter
+        countdownTime = 3; // 5 minutes
       });
       startCountdown();
     } else if (failedAttempts == 2 && totalAttempts == 2) {
       setState(() {
         isAccountLocked = true;
       });
-      updateFailedAttempts();
+      updateFailedAttempts(); // Call the function to update failed attempts in the database
       Get.snackbar(
         "Account Locked",
         "Account temporarily locked. Contact admin.",
@@ -320,7 +307,7 @@ class _LoginScreenState extends State<LoginScreen>
               return Opacity(
                 opacity: 1.0 - _backgroundOpacityAnimation.value,
                 child: Image.asset(
-                  'assets/images/gym.2.jpeg',
+                  'assets/images/gym.2.jpeg', // Second background image
                   fit: BoxFit.cover,
                 ),
               );
@@ -481,8 +468,8 @@ class _LoginScreenState extends State<LoginScreen>
 
   Widget _buildLoginFields() {
     return Card(
-      color: Colors.black.withOpacity(0.5),
-      elevation: 0,
+      color: Colors.black.withOpacity(0.5), // Semi-transparent dark background
+      elevation: 0, // Remove shadow
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
       ),
@@ -499,7 +486,8 @@ class _LoginScreenState extends State<LoginScreen>
                     hintText: "Email Address",
                     prefixIcon: const Icon(Icons.mail, color: Colors.white),
                     filled: true,
-                    fillColor: Colors.white.withOpacity(0.8),
+                    fillColor: Colors.white
+                        .withOpacity(0.8), // Slightly transparent white
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: BorderSide.none,
@@ -514,7 +502,8 @@ class _LoginScreenState extends State<LoginScreen>
                     hintText: "Password",
                     prefixIcon: const Icon(Icons.lock, color: Colors.white),
                     filled: true,
-                    fillColor: Colors.white.withOpacity(0.8),
+                    fillColor: Colors.white
+                        .withOpacity(0.8), // Slightly transparent white
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: BorderSide.none,
