@@ -9,6 +9,8 @@ import 'SignUpScreen.dart';
 import 'forgot_pass.dart';
 import 'package:get/get.dart';
 import 'package:flutter/gestures.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // For session storage
+import 'dart:math'; // For CAPTCHA generation
 
 void main() {
   runApp(const MyApp());
@@ -28,8 +30,7 @@ class MyApp extends StatelessWidget {
         '/guest': (context) => GuestScreen(),
         '/emailLogin': (context) => ContinueWithEmailScreen(),
         '/signUp': (context) => SignUpScreen(),
-        '/forgotPassword': (context) =>
-            ForgotPasswordScreen(), // Add Forgot Password route
+        '/forgotPassword': (context) => ForgotPasswordScreen(),
       },
     );
   }
@@ -51,6 +52,7 @@ class _LoginScreenState extends State<LoginScreen>
   late Animation<double> _backgroundOpacityAnimation;
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final TextEditingController captchaController = TextEditingController();
 
   int failedAttempts = 0;
   bool isButtonDisabled = false;
@@ -58,6 +60,14 @@ class _LoginScreenState extends State<LoginScreen>
   bool isAccountLocked = false;
   bool _isLocked = false;
   int totalAttempts = 5;
+  DateTime? lastFailedAttemptTime;
+
+  // CAPTCHA variables
+  String captchaText = '';
+  bool isCaptchaValid = false;
+
+  // Cookie storage
+  final Map<String, String> _cookies = {};
 
   @override
   void initState() {
@@ -67,8 +77,8 @@ class _LoginScreenState extends State<LoginScreen>
       vsync: this,
     );
     _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 1), // Start from the bottom
-      end: Offset.zero, // End at the center
+      begin: const Offset(0, 1),
+      end: Offset.zero,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     _colorAnimation = ColorTween(
@@ -85,6 +95,28 @@ class _LoginScreenState extends State<LoginScreen>
       begin: 0.0,
       end: 1.0,
     ).animate(_controller);
+
+    // Load session data on init
+    _loadSessionData();
+
+    // Generate initial CAPTCHA
+    _generateCaptcha();
+  }
+
+  // Load session data from shared preferences
+  Future<void> _loadSessionData() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _isLocked = prefs.getBool('isLocked') ?? false;
+      failedAttempts = prefs.getInt('failedAttempts') ?? 0;
+    });
+  }
+
+  // Save session data to shared preferences
+  Future<void> _saveSessionData() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLocked', _isLocked);
+    await prefs.setInt('failedAttempts', failedAttempts);
   }
 
   void toggleLoginView() {
@@ -92,9 +124,104 @@ class _LoginScreenState extends State<LoginScreen>
       showLogin = !showLogin;
     });
     if (showLogin) {
-      _controller.forward(); // Start the slide-up animation
+      _controller.forward();
     } else {
-      _controller.reverse(); // Reverse the animation
+      _controller.reverse();
+    }
+  }
+
+  // Input sanitization function
+  String sanitizeInput(String input) {
+    // Remove any potentially harmful characters
+    return input.replaceAll(RegExp(r'[<>/\\]'), '');
+  }
+
+  // Middleware for request validation
+  bool validateRequest(String email, String password) {
+    if (email.isEmpty || password.isEmpty) {
+      Get.snackbar(
+        "Error",
+        "Please fill in all fields",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return false;
+    }
+
+    // Validate email format
+    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
+      Get.snackbar(
+        "Error",
+        "Please enter a valid email address",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return false;
+    }
+
+    return true;
+  }
+
+  // Brute force defense: Rate limiting
+  bool isRateLimited() {
+    if (lastFailedAttemptTime != null) {
+      final difference = DateTime.now().difference(lastFailedAttemptTime!);
+      if (difference.inSeconds < 30) {
+        // Allow only 1 attempt every 30 seconds
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Function to handle cookies
+  void _updateCookies(http.Response response) {
+    String? rawCookie = response.headers['set-cookie'];
+    if (rawCookie != null) {
+      _cookies[rawCookie.split(';')[0].split('=')[0]] =
+          rawCookie.split(';')[0].split('=')[1];
+    }
+  }
+
+  // Function to include cookies in requests
+  Map<String, String> _getCookies() {
+    return _cookies;
+  }
+
+  // Generate CAPTCHA
+  void _generateCaptcha() {
+    const chars =
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    final random = Random();
+    captchaText = String.fromCharCodes(Iterable.generate(
+      6,
+      (_) => chars.codeUnitAt(random.nextInt(chars.length)),
+    ));
+    setState(() {});
+  }
+
+  // Validate CAPTCHA
+  bool _validateCaptcha() {
+    if (captchaController.text.trim() == captchaText) {
+      setState(() {
+        isCaptchaValid = true;
+      });
+      return true;
+    } else {
+      setState(() {
+        isCaptchaValid = false;
+      });
+      Get.snackbar(
+        "Error",
+        "Invalid CAPTCHA. Please try again.",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      _generateCaptcha(); // Regenerate CAPTCHA on failure
+      return false;
     }
   }
 
@@ -103,13 +230,24 @@ class _LoginScreenState extends State<LoginScreen>
       return;
     }
 
-    String email = emailController.text.trim();
-    String password = passwordController.text.trim();
+    String email = sanitizeInput(emailController.text.trim());
+    String password = sanitizeInput(passwordController.text.trim());
 
-    if (email.isEmpty || password.isEmpty) {
+    // Middleware validation
+    if (!validateRequest(email, password)) {
+      return;
+    }
+
+    // Validate CAPTCHA
+    if (!_validateCaptcha()) {
+      return;
+    }
+
+    // Brute force defense: Rate limiting
+    if (isRateLimited()) {
       Get.snackbar(
         "Error",
-        "Please fill in all fields",
+        "Too many attempts. Please wait before trying again.",
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -130,7 +268,14 @@ class _LoginScreenState extends State<LoginScreen>
     };
 
     try {
-      var response = await http.post(url, body: requestBody);
+      var response = await http.post(
+        url,
+        body: requestBody,
+        headers: _getCookies(), // Include cookies in the request
+      );
+
+      // Update cookies from the response
+      _updateCookies(response);
 
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
@@ -161,10 +306,15 @@ class _LoginScreenState extends State<LoginScreen>
               setState(() {
                 _isLocked = true;
               });
+              await _saveSessionData(); // Save session data
             } else {
+              // Save session data
+              await _saveSessionData();
               Navigator.pushReplacementNamed(context, '/userDashboard');
             }
           } else if (role == 'coach') {
+            // Save session data
+            await _saveSessionData();
             Navigator.pushReplacementNamed(context, '/coachDashboard');
           } else {
             Get.snackbar(
@@ -178,8 +328,10 @@ class _LoginScreenState extends State<LoginScreen>
         } else {
           setState(() {
             failedAttempts++;
+            lastFailedAttemptTime = DateTime.now();
           });
           handleFailedAttempts();
+          await _saveSessionData(); // Save session data
           Get.snackbar(
             "Alert",
             "Invalid email or password!",
@@ -213,7 +365,7 @@ class _LoginScreenState extends State<LoginScreen>
       var url = Uri.parse('http://localhost/gym_php/login.php');
 
       Map<String, dynamic> jsonData = {
-        "user_email": emailController.text,
+        "user_email": sanitizeInput(emailController.text),
         "user_failed_attempts": 1
       };
 
@@ -222,7 +374,14 @@ class _LoginScreenState extends State<LoginScreen>
         "json": jsonEncode(jsonData),
       };
 
-      var response = await http.post(url, body: requestBody);
+      var response = await http.post(
+        url,
+        body: requestBody,
+        headers: _getCookies(), // Include cookies in the request
+      );
+
+      // Update cookies from the response
+      _updateCookies(response);
 
       if (response.statusCode == 200) {
         print("Failed attempts updated successfully.");
@@ -236,24 +395,24 @@ class _LoginScreenState extends State<LoginScreen>
     if (failedAttempts == 5 && totalAttempts == 5) {
       setState(() {
         isButtonDisabled = true;
-        totalAttempts = 3; // Reset total attempts to 3
-        failedAttempts = 0; // Reset failed attempts counter
-        countdownTime = 3; // 2 minutes
+        totalAttempts = 3;
+        failedAttempts = 0;
+        countdownTime = 30; // 30 seconds cooldown
       });
       startCountdown();
     } else if (failedAttempts == 3 && totalAttempts == 3) {
       setState(() {
         isButtonDisabled = true;
-        totalAttempts = 2; // Reset total attempts to 2
-        failedAttempts = 0; // Reset failed attempts counter
-        countdownTime = 3; // 5 minutes
+        totalAttempts = 2;
+        failedAttempts = 0;
+        countdownTime = 60; // 1 minute cooldown
       });
       startCountdown();
     } else if (failedAttempts == 2 && totalAttempts == 2) {
       setState(() {
         isAccountLocked = true;
       });
-      updateFailedAttempts(); // Call the function to update failed attempts in the database
+      updateFailedAttempts();
       Get.snackbar(
         "Account Locked",
         "Account temporarily locked. Contact admin.",
@@ -284,6 +443,7 @@ class _LoginScreenState extends State<LoginScreen>
     _controller.dispose();
     emailController.dispose();
     passwordController.dispose();
+    captchaController.dispose();
     super.dispose();
   }
 
@@ -307,7 +467,7 @@ class _LoginScreenState extends State<LoginScreen>
               return Opacity(
                 opacity: 1.0 - _backgroundOpacityAnimation.value,
                 child: Image.asset(
-                  'assets/images/gym.2.jpeg', // Second background image
+                  'assets/images/gym.2.jpeg',
                   fit: BoxFit.cover,
                 ),
               );
@@ -468,8 +628,8 @@ class _LoginScreenState extends State<LoginScreen>
 
   Widget _buildLoginFields() {
     return Card(
-      color: Colors.black.withOpacity(0.5), // Semi-transparent dark background
-      elevation: 0, // Remove shadow
+      color: Colors.black.withOpacity(0.5),
+      elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
       ),
@@ -486,8 +646,7 @@ class _LoginScreenState extends State<LoginScreen>
                     hintText: "Email Address",
                     prefixIcon: const Icon(Icons.mail, color: Colors.white),
                     filled: true,
-                    fillColor: Colors.white
-                        .withOpacity(0.8), // Slightly transparent white
+                    fillColor: Colors.white.withOpacity(0.8),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: BorderSide.none,
@@ -502,8 +661,7 @@ class _LoginScreenState extends State<LoginScreen>
                     hintText: "Password",
                     prefixIcon: const Icon(Icons.lock, color: Colors.white),
                     filled: true,
-                    fillColor: Colors.white
-                        .withOpacity(0.8), // Slightly transparent white
+                    fillColor: Colors.white.withOpacity(0.8),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                       borderSide: BorderSide.none,
@@ -522,6 +680,45 @@ class _LoginScreenState extends State<LoginScreen>
                       },
                     ),
                   ),
+                ),
+                const SizedBox(height: 10),
+                // CAPTCHA Section
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: captchaController,
+                        decoration: InputDecoration(
+                          hintText: "Enter CAPTCHA",
+                          filled: true,
+                          fillColor: Colors.white.withOpacity(0.8),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    GestureDetector(
+                      onTap: _generateCaptcha,
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.8),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          captchaText,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 Align(
                   alignment: Alignment.centerRight,
