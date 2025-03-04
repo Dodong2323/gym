@@ -65,6 +65,10 @@ class _LoginScreenState extends State<LoginScreen>
   // CAPTCHA variables
   String captchaText = '';
   bool isCaptchaValid = false;
+  bool showCaptcha = false; // New state variable to control CAPTCHA visibility
+
+  // Checkbox variable
+  bool _acceptTerms = false;
 
   // Cookie storage
   final Map<String, String> _cookies = {};
@@ -682,43 +686,70 @@ class _LoginScreenState extends State<LoginScreen>
                   ),
                 ),
                 const SizedBox(height: 10),
-                // CAPTCHA Section
+                // Checkbox for CAPTCHA
                 Row(
                   children: [
-                    Expanded(
-                      child: TextFormField(
-                        controller: captchaController,
-                        decoration: InputDecoration(
-                          hintText: "Enter CAPTCHA",
-                          filled: true,
-                          fillColor: Colors.white.withOpacity(0.8),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                      ),
+                    Checkbox(
+                      value: _acceptTerms,
+                      onChanged: (value) {
+                        setState(() {
+                          _acceptTerms = value ?? false;
+                          showCaptcha =
+                              _acceptTerms; // Show CAPTCHA when checked
+                        });
+                      },
+                      activeColor: Colors.orange,
                     ),
-                    const SizedBox(width: 10),
-                    GestureDetector(
-                      onTap: _generateCaptcha,
-                      child: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.8),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          captchaText,
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
-                          ),
-                        ),
-                      ),
+                    const Text(
+                      "Check CAPTCHA",
+                      style: TextStyle(color: Colors.white),
                     ),
                   ],
+                ),
+                // CAPTCHA Section with Transition
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  child: showCaptcha
+                      ? Row(
+                          key: const ValueKey('captcha'),
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: captchaController,
+                                decoration: InputDecoration(
+                                  hintText: "Enter CAPTCHA",
+                                  filled: true,
+                                  fillColor: Colors.white.withOpacity(0.8),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            GestureDetector(
+                              onTap: _generateCaptcha,
+                              child: Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.8),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Text(
+                                  captchaText,
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
+                      : const SizedBox
+                          .shrink(), // Empty widget when CAPTCHA is hidden
                 ),
                 Align(
                   alignment: Alignment.centerRight,

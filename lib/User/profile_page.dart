@@ -53,7 +53,8 @@ class ProfilePage extends StatelessWidget {
               children: [
                 // Profile Header Section
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
                   child: Row(
                     children: [
                       GestureDetector(
@@ -63,13 +64,15 @@ class ProfilePage extends StatelessWidget {
                         child: CircleAvatar(
                           radius: 50,
                           backgroundColor: Colors.white,
-                          backgroundImage: AssetImage('assets/profile_placeholder.png'), // Placeholder image
+                          backgroundImage: AssetImage(
+                              'assets/profile_placeholder.png'), // Placeholder image
                           child: Align(
                             alignment: Alignment.bottomRight,
                             child: CircleAvatar(
                               radius: 18,
                               backgroundColor: Colors.orange,
-                              child: Icon(Icons.camera_alt, color: Colors.white, size: 20),
+                              child: Icon(Icons.camera_alt,
+                                  color: Colors.white, size: 20),
                             ),
                           ),
                         ),
@@ -94,7 +97,8 @@ class ProfilePage extends StatelessWidget {
                           SizedBox(height: 4),
                           Text(
                             'johndoe@example.com', // Replace with dynamic email
-                            style: TextStyle(fontSize: 16, color: Colors.white70),
+                            style:
+                                TextStyle(fontSize: 16, color: Colors.white70),
                           ),
                         ],
                       ),
@@ -107,10 +111,12 @@ class ProfilePage extends StatelessWidget {
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(20)),
                     ),
                     child: ListView(
-                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 20),
                       children: [
                         _buildListTile(
                           context,
@@ -165,7 +171,9 @@ class ProfilePage extends StatelessWidget {
   }
 
   Widget _buildListTile(BuildContext context,
-      {required String title, required IconData icon, required VoidCallback onTap}) {
+      {required String title,
+      required IconData icon,
+      required VoidCallback onTap}) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       elevation: 3,
@@ -192,7 +200,8 @@ class ProfilePage extends StatelessWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           title: Text(
             'Edit Profile',
             style: TextStyle(fontWeight: FontWeight.bold),
@@ -202,9 +211,16 @@ class ProfilePage extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 _buildTextField(controller: nameController, labelText: 'Name'),
-                _buildTextField(controller: ageController, labelText: 'Age', keyboardType: TextInputType.number),
-                _buildTextField(controller: birthdayController, labelText: 'Birthday', keyboardType: TextInputType.datetime),
-                _buildTextField(controller: addressController, labelText: 'Address'),
+                _buildTextField(
+                    controller: ageController,
+                    labelText: 'Age',
+                    keyboardType: TextInputType.number),
+                _buildTextField(
+                    controller: birthdayController,
+                    labelText: 'Birthday',
+                    keyboardType: TextInputType.datetime),
+                _buildTextField(
+                    controller: addressController, labelText: 'Address'),
                 _buildTextField(controller: bioController, labelText: 'Bio'),
               ],
             ),
@@ -231,7 +247,9 @@ class ProfilePage extends StatelessWidget {
   }
 
   Widget _buildTextField(
-      {required TextEditingController controller, required String labelText, TextInputType keyboardType = TextInputType.text}) {
+      {required TextEditingController controller,
+      required String labelText,
+      TextInputType keyboardType = TextInputType.text}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
       child: TextField(
@@ -292,7 +310,8 @@ class ProfilePage extends StatelessWidget {
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: Text('Close')),
+            TextButton(
+                onPressed: () => Navigator.pop(context), child: Text('Close')),
           ],
         );
       },
@@ -307,7 +326,8 @@ class ProfilePage extends StatelessWidget {
           title: Text('Log Out'),
           content: Text('Are you sure you want to log out?'),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(context), child: Text('Cancel')),
+            TextButton(
+                onPressed: () => Navigator.pop(context), child: Text('Cancel')),
             ElevatedButton(
               onPressed: () {
                 // Close the dialog
