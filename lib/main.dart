@@ -9,21 +9,36 @@ import 'SignUpScreen.dart';
 import 'forgot_pass.dart';
 import 'package:get/get.dart';
 import 'package:flutter/gestures.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // For session storage
-import 'dart:math'; // For CAPTCHA generation
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:math';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+  final bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+  final String role = prefs.getString('role') ?? '';
+
+  print("Is Logged In: $isLoggedIn");
+  print("Role: $role");
+
+  runApp(MyApp(isLoggedIn: isLoggedIn, role: role));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool isLoggedIn;
+  final String role;
+
+  const MyApp({super.key, required this.isLoggedIn, required this.role});
 
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      home: LoginScreen(),
+      home: isLoggedIn
+          ? role == 'members'
+              ? UserDashboard()
+              : CoachDashboard()
+          : LoginScreen(),
       routes: {
         '/userDashboard': (context) => UserDashboard(),
         '/coachDashboard': (context) => CoachDashboard(),
@@ -65,7 +80,7 @@ class _LoginScreenState extends State<LoginScreen>
   // CAPTCHA variables
   String captchaText = '';
   bool isCaptchaValid = false;
-  bool showCaptcha = false; // New state variable to control CAPTCHA visibility
+  bool showCaptcha = false;
 
   // Checkbox variable
   bool _acceptTerms = false;
@@ -136,7 +151,6 @@ class _LoginScreenState extends State<LoginScreen>
 
   // Input sanitization function
   String sanitizeInput(String input) {
-    // Remove any potentially harmful characters
     return input.replaceAll(RegExp(r'[<>/\\]'), '');
   }
 
@@ -153,7 +167,6 @@ class _LoginScreenState extends State<LoginScreen>
       return false;
     }
 
-    // Validate email format
     if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(email)) {
       Get.snackbar(
         "Error",
@@ -173,7 +186,6 @@ class _LoginScreenState extends State<LoginScreen>
     if (lastFailedAttemptTime != null) {
       final difference = DateTime.now().difference(lastFailedAttemptTime!);
       if (difference.inSeconds < 30) {
-        // Allow only 1 attempt every 30 seconds
         return true;
       }
     }
@@ -224,7 +236,7 @@ class _LoginScreenState extends State<LoginScreen>
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
-      _generateCaptcha(); // Regenerate CAPTCHA on failure
+      _generateCaptcha();
       return false;
     }
   }
@@ -237,17 +249,14 @@ class _LoginScreenState extends State<LoginScreen>
     String email = sanitizeInput(emailController.text.trim());
     String password = sanitizeInput(passwordController.text.trim());
 
-    // Middleware validation
     if (!validateRequest(email, password)) {
       return;
     }
 
-    // Validate CAPTCHA
     if (!_validateCaptcha()) {
       return;
     }
 
-    // Brute force defense: Rate limiting
     if (isRateLimited()) {
       Get.snackbar(
         "Error",
@@ -275,10 +284,9 @@ class _LoginScreenState extends State<LoginScreen>
       var response = await http.post(
         url,
         body: requestBody,
-        headers: _getCookies(), // Include cookies in the request
+        headers: _getCookies(),
       );
 
-      // Update cookies from the response
       _updateCookies(response);
 
       if (response.statusCode == 200) {
@@ -296,9 +304,16 @@ class _LoginScreenState extends State<LoginScreen>
         }
 
         if (data != 0) {
-          String role = data['Role'];
+          String role =
+              data['Role']; // Ensure this matches the backend response
+          print("Role from backend: $role"); // Debug print
+
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('isLoggedIn', true);
+          await prefs.setString('role', role);
 
           if (role == 'members') {
+            print("Navigating to UserDashboard"); // Debug print
             if (data['user_failed_attempts'] == 1) {
               Get.snackbar(
                 "Account Locked",
@@ -310,14 +325,13 @@ class _LoginScreenState extends State<LoginScreen>
               setState(() {
                 _isLocked = true;
               });
-              await _saveSessionData(); // Save session data
+              await _saveSessionData();
             } else {
-              // Save session data
               await _saveSessionData();
               Navigator.pushReplacementNamed(context, '/userDashboard');
             }
           } else if (role == 'coach') {
-            // Save session data
+            print("Navigating to CoachDashboard"); // Debug print
             await _saveSessionData();
             Navigator.pushReplacementNamed(context, '/coachDashboard');
           } else {
@@ -335,7 +349,7 @@ class _LoginScreenState extends State<LoginScreen>
             lastFailedAttemptTime = DateTime.now();
           });
           handleFailedAttempts();
-          await _saveSessionData(); // Save session data
+          await _saveSessionData();
           Get.snackbar(
             "Alert",
             "Invalid email or password!",
@@ -381,10 +395,8 @@ class _LoginScreenState extends State<LoginScreen>
       var response = await http.post(
         url,
         body: requestBody,
-        headers: _getCookies(), // Include cookies in the request
+        headers: _getCookies(),
       );
-
-      // Update cookies from the response
       _updateCookies(response);
 
       if (response.statusCode == 200) {
@@ -401,7 +413,7 @@ class _LoginScreenState extends State<LoginScreen>
         isButtonDisabled = true;
         totalAttempts = 3;
         failedAttempts = 0;
-        countdownTime = 30; // 30 seconds cooldown
+        countdownTime = 30;
       });
       startCountdown();
     } else if (failedAttempts == 3 && totalAttempts == 3) {
@@ -409,7 +421,7 @@ class _LoginScreenState extends State<LoginScreen>
         isButtonDisabled = true;
         totalAttempts = 2;
         failedAttempts = 0;
-        countdownTime = 60; // 1 minute cooldown
+        countdownTime = 60;
       });
       startCountdown();
     } else if (failedAttempts == 2 && totalAttempts == 2) {
@@ -686,7 +698,6 @@ class _LoginScreenState extends State<LoginScreen>
                   ),
                 ),
                 const SizedBox(height: 10),
-                // Checkbox for CAPTCHA
                 Row(
                   children: [
                     Checkbox(
@@ -694,8 +705,7 @@ class _LoginScreenState extends State<LoginScreen>
                       onChanged: (value) {
                         setState(() {
                           _acceptTerms = value ?? false;
-                          showCaptcha =
-                              _acceptTerms; // Show CAPTCHA when checked
+                          showCaptcha = _acceptTerms;
                         });
                       },
                       activeColor: Colors.orange,
@@ -706,7 +716,6 @@ class _LoginScreenState extends State<LoginScreen>
                     ),
                   ],
                 ),
-                // CAPTCHA Section with Transition
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
                   child: showCaptcha
@@ -727,7 +736,8 @@ class _LoginScreenState extends State<LoginScreen>
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 10),
+                            const SizedBox(
+                                width: 10), // Correct placement of SizedBox
                             GestureDetector(
                               onTap: _generateCaptcha,
                               child: Container(
@@ -748,8 +758,7 @@ class _LoginScreenState extends State<LoginScreen>
                             ),
                           ],
                         )
-                      : const SizedBox
-                          .shrink(), // Empty widget when CAPTCHA is hidden
+                      : const SizedBox(), // Added fallback widget for AnimatedSwitcher
                 ),
                 Align(
                   alignment: Alignment.centerRight,

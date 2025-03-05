@@ -8,19 +8,9 @@ class QRPage extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
+      backgroundColor: Colors.black, // Dark background for modern look
       body: Stack(
         children: [
-          // Header Background Gradient
-          Container(
-            height: screenHeight * 0.25, // 25% of the screen height
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.orange.shade300, Colors.orange.shade800],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-          ),
           SafeArea(
             child: SingleChildScrollView(
               child: Padding(
@@ -28,8 +18,7 @@ class QRPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Add spacing for better alignment after header removal
-                    SizedBox(height: screenHeight * 0.15),
+                    SizedBox(height: screenHeight * 0.1), // Adjust spacing
 
                     // QR Code Section
                     Center(
@@ -38,9 +27,10 @@ class QRPage extends StatelessWidget {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
                         ),
+                        color: Colors.grey[900], // Dark theme for QR box
                         child: Container(
-                          width: screenWidth * 0.7, // 70% of screen width
-                          padding: EdgeInsets.all(16),
+                          width: screenWidth * 0.7,
+                          padding: EdgeInsets.all(20),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -54,6 +44,8 @@ class QRPage extends StatelessWidget {
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w500,
+                                  color:
+                                      Colors.white, // White text for dark theme
                                 ),
                               ),
                             ],
@@ -65,37 +57,66 @@ class QRPage extends StatelessWidget {
 
                     // Action Buttons
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            print("Download QR Code");
-                          },
-                          style: ElevatedButton.styleFrom(
-                            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                            backgroundColor: Colors.orange.shade600,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          icon: Icon(Icons.download, color: Colors.white),
-                          label: Text('Download', style: TextStyle(color: Colors.white)),
+                        _buildGradientButton(
+                          text: 'Download',
+                          icon: Icons.download,
+                          onPressed: () => print("Download QR Code"),
                         ),
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            print("Share QR Code");
-                          },
-                          style: ElevatedButton.styleFrom(
-                            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                            backgroundColor: Colors.orange.shade800,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          icon: Icon(Icons.share, color: Colors.white),
-                          label: Text('Share', style: TextStyle(color: Colors.white)),
+                        _buildGradientButton(
+                          text: 'Share',
+                          icon: Icons.share,
+                          onPressed: () => print("Share QR Code"),
                         ),
                       ],
+                    ),
+                    SizedBox(height: screenHeight * 0.05),
+
+                    // Done Button
+                    Center(
+                      child: SizedBox(
+                        width: screenWidth * 0.6,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            print("Done Button Pressed");
+                          },
+                          style: ElevatedButton.styleFrom(
+                            padding: EdgeInsets.zero,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            backgroundColor: Colors.transparent,
+                            elevation: 0,
+                          ),
+                          child: Ink(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.orange.shade600,
+                                  Colors.orange.shade900
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            child: Container(
+                              alignment: Alignment.center,
+                              height: 50,
+                              child: Text(
+                                "DONE",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                     SizedBox(height: screenHeight * 0.05),
                   ],
@@ -105,6 +126,26 @@ class QRPage extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  // Helper function to create a gradient button
+  Widget _buildGradientButton(
+      {required String text,
+      required IconData icon,
+      required VoidCallback onPressed}) {
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(30), // Rounded button
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      icon: Icon(icon, color: Colors.white),
+      label: Text(text, style: TextStyle(color: Colors.white)),
     );
   }
 }
