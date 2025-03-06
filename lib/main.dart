@@ -40,6 +40,7 @@ class MyApp extends StatelessWidget {
               : CoachDashboard()
           : LoginScreen(),
       routes: {
+        '/login': (context) => LoginScreen(), // Add this route
         '/userDashboard': (context) => UserDashboard(),
         '/coachDashboard': (context) => CoachDashboard(),
         '/guest': (context) => GuestScreen(),

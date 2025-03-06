@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilePage extends StatelessWidget {
   @override
@@ -76,7 +77,9 @@ class ProfilePage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10)),
                     minimumSize: Size(double.infinity, 50),
                   ),
-                  onPressed: () {},
+                  onPressed: () async {
+                    await _signOut(context); // Call the sign-out function
+                  },
                   child: Text('Sign Out', style: TextStyle(fontSize: 16)),
                 ),
               ),
@@ -114,6 +117,16 @@ class ProfilePage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // Sign-out function
+  Future<void> _signOut(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLoggedIn', false); // Clear the login state
+    await prefs.remove('role'); // Remove the user role
+
+    // Navigate back to the LoginScreen
+    Navigator.pushReplacementNamed(context, '/login');
   }
 }
 

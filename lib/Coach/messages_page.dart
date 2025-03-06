@@ -2,11 +2,31 @@ import 'package:flutter/material.dart';
 
 class MessagesPage extends StatelessWidget {
   final List<Map<String, String>> messages = [
-    {"name": "Coach Alex", "message": "Great job in today's session!", "time": "10:30 AM"},
-    {"name": "Coach Mia", "message": "Remember to hydrate well after your workout.", "time": "9:15 AM"},
-    {"name": "Coach John", "message": "Your next session is scheduled for tomorrow.", "time": "8:50 AM"},
-    {"name": "Coach Emily", "message": "Please check the updated gym program.", "time": "Yesterday"},
-    {"name": "Coach Mike", "message": "Keep up the good work!", "time": "Yesterday"},
+    {
+      "name": "Coach Alex",
+      "message": "Great job in today's session!",
+      "time": "10:30 AM"
+    },
+    {
+      "name": "Coach Mia",
+      "message": "Remember to hydrate well after your workout.",
+      "time": "9:15 AM"
+    },
+    {
+      "name": "Coach John",
+      "message": "Your next session is scheduled for tomorrow.",
+      "time": "8:50 AM"
+    },
+    {
+      "name": "Coach Emily",
+      "message": "Please check the updated gym program.",
+      "time": "Yesterday"
+    },
+    {
+      "name": "Coach Mike",
+      "message": "Keep up the good work!",
+      "time": "Yesterday"
+    },
   ];
 
   @override
@@ -32,10 +52,12 @@ class MessagesPage extends StatelessWidget {
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(20)),
                     ),
                     child: ListView.builder(
-                      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 10.0),
                       itemCount: messages.length,
                       itemBuilder: (context, index) {
                         final message = messages[index];
@@ -46,17 +68,20 @@ class MessagesPage extends StatelessWidget {
                           ),
                           margin: EdgeInsets.symmetric(vertical: 8.0),
                           child: ListTile(
-                            contentPadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 20.0, vertical: 15.0),
                             leading: CircleAvatar(
                               backgroundColor: Colors.orange.shade600,
                               child: Text(
                                 message['name']![6],
-                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                style: TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.bold),
                               ),
                             ),
                             title: Text(
                               message['name']!,
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 18),
                             ),
                             subtitle: Text(
                               message['message']!,
@@ -70,7 +95,8 @@ class MessagesPage extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => ChatPage(coachName: message['name']!),
+                                  builder: (context) =>
+                                      ChatPage(coachName: message['name']!),
                                 ),
                               );
                             },
@@ -115,7 +141,10 @@ class ChatPage extends StatelessWidget {
             ),
             child: Text(
               'Chat with $coachName',
-              style: TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  fontSize: 24,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold),
             ),
           ),
           Expanded(

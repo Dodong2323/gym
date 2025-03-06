@@ -92,7 +92,7 @@ class _CoachDashboardState extends State<CoachDashboard> {
                 color: _selectedIndex == 3
                     ? Colors.deepOrangeAccent
                     : Colors.white),
-            label: 'Logs & Progress',
+            label: 'Members',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.account_circle,
