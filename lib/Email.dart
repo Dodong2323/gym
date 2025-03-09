@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 class ContinueWithEmailScreen extends StatefulWidget {
   @override
-  _ContinueWithEmailScreenState createState() => _ContinueWithEmailScreenState();
+  _ContinueWithEmailScreenState createState() =>
+      _ContinueWithEmailScreenState();
 }
 
 class _ContinueWithEmailScreenState extends State<ContinueWithEmailScreen> {

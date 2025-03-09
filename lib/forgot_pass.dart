@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 void main() {
   runApp(GetMaterialApp(
@@ -11,6 +13,32 @@ void main() {
 // 📌 1️⃣ Forgot Password Screen (Enter Email)
 class ForgotPasswordScreen extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();
+
+  Future<void> forgotpass(String email) async {
+    final url = Uri.parse('http:localhost/gym_php/send_email.php');
+    final response = await http.post(
+      url,
+      body: {
+        'email': email,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      if (responseData['status'] == 'success') {
+        Get.snackbar(
+            'Success', 'Password reset instructions sent to your email',
+            backgroundColor: Colors.green, colorText: Colors.white);
+        Get.to(() => OTPVerificationScreen(email: email));
+      } else {
+        Get.snackbar('Error', responseData['message'],
+            backgroundColor: Colors.red, colorText: Colors.white);
+      }
+    } else {
+      Get.snackbar('Error', 'Failed to connect to the server',
+          backgroundColor: Colors.red, colorText: Colors.white);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,8 +77,7 @@ class ForgotPasswordScreen extends StatelessWidget {
             SizedBox(height: screenHeight * 0.04),
             ElevatedButton(
               onPressed: () {
-                Get.to(() =>
-                    OTPVerificationScreen(email: emailController.text.trim()));
+                forgotpass(emailController.text.trim());
               },
               child: Text("Send Instructions"),
               style: ElevatedButton.styleFrom(
