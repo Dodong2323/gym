@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'Coach/routine_page.dart';
 import 'Coach/gym_programs_page.dart';
 import 'Coach/qr_page.dart';
@@ -21,6 +22,24 @@ class _CoachDashboardState extends State<CoachDashboard> {
     MembersProgressPage(),
     ProfilePage(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSelectedIndex();
+  }
+
+  Future<void> _loadSelectedIndex() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _selectedIndex = prefs.getInt('selectedIndex') ?? 0;
+    });
+  }
+
+  Future<void> _saveSelectedIndex(int index) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('selectedIndex', index);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,8 +78,10 @@ class _CoachDashboardState extends State<CoachDashboard> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
+          _saveSelectedIndex(index).then((_) {
+            setState(() {
+              _selectedIndex = index;
+            });
           });
         },
         backgroundColor: Color(0xFF1E1E1E), // Dark background color

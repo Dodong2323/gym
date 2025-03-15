@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'User/gym_programs_page.dart';
 import 'User/qr_page.dart';
 import 'User/logs_progress_page.dart'; // Changed from members_progress_page.dart
@@ -20,6 +21,24 @@ class _UserDashboardState extends State<UserDashboard> {
     LogsProgressPage(),
     ProfilePage(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSelectedIndex();
+  }
+
+  Future<void> _loadSelectedIndex() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _selectedIndex = prefs.getInt('selectedIndex') ?? 0;
+    });
+  }
+
+  Future<void> _saveSelectedIndex(int index) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('selectedIndex', index);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +76,8 @@ class _UserDashboardState extends State<UserDashboard> {
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
-        onTap: (index) {
+        onTap: (index) async {
+          await _saveSelectedIndex(index);
           setState(() {
             _selectedIndex = index;
           });

@@ -74,11 +74,17 @@ class ProfilePage extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                     minimumSize: Size(double.infinity, 50),
                   ),
                   onPressed: () async {
-                    await _signOut(context); // Call the sign-out function
+                    // Clear all shared preferences
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.clear();
+
+                    // Call the sign-out function
+                    await _signOut(context);
                   },
                   child: Text('Sign Out', style: TextStyle(fontSize: 16)),
                 ),
