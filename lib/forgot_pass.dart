@@ -15,29 +15,10 @@ class ForgotPasswordScreen extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();
 
   Future<void> forgotpass(String email) async {
-    final url = Uri.parse('http:localhost/gym_php/send_email.php');
-    final response = await http.post(
-      url,
-      body: {
-        'email': email,
-      },
-    );
-
-    if (response.statusCode == 200) {
-      final responseData = json.decode(response.body);
-      if (responseData['status'] == 'success') {
-        Get.snackbar(
-            'Success', 'Password reset instructions sent to your email',
-            backgroundColor: Colors.green, colorText: Colors.white);
-        Get.to(() => OTPVerificationScreen(email: email));
-      } else {
-        Get.snackbar('Error', responseData['message'],
-            backgroundColor: Colors.red, colorText: Colors.white);
-      }
-    } else {
-      Get.snackbar('Error', 'Failed to connect to the server',
-          backgroundColor: Colors.red, colorText: Colors.white);
-    }
+    // Simulate successful email send and move to OTP screen
+    Get.snackbar('Mock Success', 'Proceeding to OTP screen...',
+        backgroundColor: Colors.green, colorText: Colors.white);
+    Get.to(() => OTPVerificationScreen(email: email));
   }
 
   @override
