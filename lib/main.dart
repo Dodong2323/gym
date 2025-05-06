@@ -753,8 +753,6 @@ class _LoginScreenState extends State<LoginScreen>
                   : const SizedBox(),
             ),
             const SizedBox(height: 10),
-
-            /// Forgot Password (italic)
             Align(
               alignment: Alignment.centerRight,
               child: GestureDetector(
@@ -766,7 +764,7 @@ class _LoginScreenState extends State<LoginScreen>
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 12,
-                    fontStyle: FontStyle.italic, // italic
+                    fontStyle: FontStyle.italic,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
@@ -774,7 +772,6 @@ class _LoginScreenState extends State<LoginScreen>
             ),
             const SizedBox(height: 20),
 
-            /// Lockout warning
             if (isButtonDisabled)
               Text(
                 "Try again in $countdownTime seconds",
@@ -785,8 +782,6 @@ class _LoginScreenState extends State<LoginScreen>
                 ),
               ),
             const SizedBox(height: 10),
-
-            /// Login Button
             Visibility(
               visible: !_isLocked,
               child: ElevatedButton(
@@ -808,7 +803,6 @@ class _LoginScreenState extends State<LoginScreen>
             ),
             const SizedBox(height: 10),
 
-            /// Sign Up prompt
             Center(
               child: RichText(
                 text: TextSpan(

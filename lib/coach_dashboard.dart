@@ -5,7 +5,7 @@ import 'Coach/gym_programs_page.dart';
 import 'Coach/qr_page.dart';
 import 'Coach/members_progress_page.dart';
 import 'Coach/profile_page.dart';
-import 'Coach/messages_page.dart'; // Import MessagesPage
+import 'Coach/messages_page.dart';
 
 class CoachDashboard extends StatefulWidget {
   @override
@@ -20,7 +20,6 @@ class _CoachDashboardState extends State<CoachDashboard> {
     GymProgramsPage(),
     QRPage(),
     MembersProgressPage(),
-    ProfilePage(),
   ];
 
   @override
@@ -41,40 +40,68 @@ class _CoachDashboardState extends State<CoachDashboard> {
     await prefs.setInt('selectedIndex', index);
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          _pages[_selectedIndex],
-          Positioned(
-            top: 40,
-            right: 16,
-            child: FloatingActionButton(
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: Text('Notifications'),
-                    content: Text('You have no new notifications.'),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        child: Text('Close'),
-                      ),
-                    ],
-                  ),
-                );
-              },
-              backgroundColor: Colors.red,
-              mini: true,
-              child: Icon(Icons.notifications),
-            ),
+  void _showNotificationsDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Notifications'),
+        content: Text('You have no new notifications.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('Close'),
           ),
         ],
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: _selectedIndex == 0
+          ? AppBar(
+              backgroundColor: Color(0xFF1E1E1E),
+              automaticallyImplyLeading: false,
+              title: Row(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => ProfilePage()),
+                      );
+                    },
+                    child: CircleAvatar(
+                      backgroundColor: Colors.orange,
+                      child: Icon(Icons.person, color: Colors.white),
+                    ),
+                  ),
+                  SizedBox(width: 10),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Christian Jay',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold)),
+                      Text('christian@example.com',
+                          style:
+                              TextStyle(color: Colors.white70, fontSize: 12)),
+                    ],
+                  ),
+                ],
+              ),
+              actions: [
+                IconButton(
+                  icon: Icon(Icons.notifications, color: Colors.white),
+                  onPressed: _showNotificationsDialog,
+                ),
+              ],
+            )
+          : null,
+      body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: (index) {
@@ -84,8 +111,8 @@ class _CoachDashboardState extends State<CoachDashboard> {
             });
           });
         },
-        backgroundColor: Color(0xFF1E1E1E), // Dark background color
-        selectedItemColor: Color(0xFFFF9800), // Orange for selected item
+        backgroundColor: Color(0xFF1E1E1E),
+        selectedItemColor: Color(0xFFFF9800),
         unselectedItemColor: Colors.white,
         selectedLabelStyle:
             TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
@@ -115,15 +142,10 @@ class _CoachDashboardState extends State<CoachDashboard> {
                     : Colors.white),
             label: 'Members',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.account_circle,
-                color: _selectedIndex == 4 ? Colors.white : Colors.white70),
-            label: 'Account',
-          ),
         ],
       ),
       floatingActionButton: Container(
-        width: 45, // Adjusted size to match the uploaded image
+        width: 45,
         height: 45,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
@@ -148,17 +170,15 @@ class _CoachDashboardState extends State<CoachDashboard> {
               MaterialPageRoute(builder: (context) => MessagesPage()),
             );
           },
-          backgroundColor:
-              Colors.transparent, // Keep transparent for gradient effect
-          elevation: 0, // Remove default floating effect
+          backgroundColor: Colors.transparent,
+          elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(50), // Keep circular
+            borderRadius: BorderRadius.circular(50),
           ),
           child: Icon(
-            Icons
-                .chat_bubble_outline, // Outlined chat bubble similar to your image
-            color: Colors.black, // Matches the uploaded design
-            size: 20, // 🔹 Reduced size for a smaller icon
+            Icons.chat_bubble_outline,
+            color: Colors.black,
+            size: 20,
           ),
         ),
       ),

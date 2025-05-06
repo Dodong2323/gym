@@ -97,35 +97,6 @@ class _RoutinePageState extends State<RoutinePage> {
         cardColor: const Color(0xFF2A2A2A),
       ),
       home: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.black,
-          elevation: 0,
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  CircleAvatar(
-                    backgroundImage: AssetImage('assets/user_profile.png'),
-                    radius: 20,
-                  ),
-                  SizedBox(width: 10),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("User Name",
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold)),
-                      Text("user@example.com",
-                          style:
-                              TextStyle(fontSize: 12, color: Colors.grey[600])),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
         body: Column(
           children: [
             Padding(
