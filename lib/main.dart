@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'user_dashboard.dart';
 import 'coach_dashboard.dart';
-import 'SignUpScreen.dart';
+import 'FirstTimeSetupScreen.dart';
 import 'forgot_pass.dart';
 import 'package:get/get.dart';
 import 'package:flutter/gestures.dart';
@@ -15,33 +15,43 @@ void main() async {
   final prefs = await SharedPreferences.getInstance();
   final bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
   final String role = prefs.getString('role') ?? '';
+  final bool profileCompleted = prefs.getBool('profileCompleted') ?? false;
 
-  print("Is Logged In: $isLoggedIn");
-  print("Role: $role");
-
-  runApp(MyApp(isLoggedIn: isLoggedIn, role: role));
+  runApp(MyApp(
+    isLoggedIn: isLoggedIn,
+    role: role,
+    profileCompleted: profileCompleted,
+  ));
 }
 
 class MyApp extends StatelessWidget {
   final bool isLoggedIn;
   final String role;
+  final bool profileCompleted;
 
-  const MyApp({super.key, required this.isLoggedIn, required this.role});
+  const MyApp({
+    super.key,
+    required this.isLoggedIn,
+    required this.role,
+    required this.profileCompleted,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       home: isLoggedIn
-          ? role == 'members'
-              ? UserDashboard()
-              : CoachDashboard()
+          ? profileCompleted
+              ? role == 'members'
+                  ? UserDashboard()
+                  : CoachDashboard()
+              : FirstTimeSetupScreen() // Redirect to setup if not completed
           : LoginScreen(),
       routes: {
         '/login': (context) => LoginScreen(),
         '/userDashboard': (context) => UserDashboard(),
         '/coachDashboard': (context) => CoachDashboard(),
-        '/signUp': (context) => SignUpScreen(),
+        '/FirstTimeSetup': (context) => FirstTimeSetupScreen(),
         '/forgotPassword': (context) => ForgotPasswordScreen(),
       },
     );
