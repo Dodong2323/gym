@@ -1,5 +1,19 @@
 import 'package:flutter/material.dart';
 
+void main() {
+  runApp(MaterialApp(
+    debugShowCheckedModeBanner: false,
+    theme: ThemeData.dark().copyWith(
+      scaffoldBackgroundColor: const Color(0xFF1A1A1A),
+      cardColor: const Color(0xFF2A2A2A),
+    ),
+    home: RoutinePage(),
+  ));
+}
+
+// ---------------------------
+// Routine Page
+// ---------------------------
 class RoutinePage extends StatefulWidget {
   @override
   _RoutinePageState createState() => _RoutinePageState();
@@ -7,14 +21,6 @@ class RoutinePage extends StatefulWidget {
 
 class _RoutinePageState extends State<RoutinePage> {
   final List<Map<String, dynamic>> workouts = [
-    {
-      "header": "PREVIOUS WORKOUT - PUSH",
-      "title": "Chest, Shoulder, Triceps",
-      "duration": "89 mins",
-      "exercises": "8 exercises",
-      "exerciseNames":
-          "Plate-Loaded Incline Chest Press - Single Arm Dumbbell Bench Press - Cable Press-Around - Dumbbell Lateral Raise Seated",
-    },
     {
       "header": "PREVIOUS WORKOUT - PUSH",
       "title": "Chest, Shoulder, Triceps",
@@ -44,23 +50,24 @@ class _RoutinePageState extends State<RoutinePage> {
       builder: (context) {
         return AlertDialog(
           title: Text("Add New Workout"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                  controller: titleController,
-                  decoration: InputDecoration(labelText: "Workout Type")),
-              TextField(
-                  controller: durationController,
-                  decoration: InputDecoration(labelText: "Minutes"),
-                  keyboardType: TextInputType.number),
-              TextField(
-                  controller: exercisesController,
-                  decoration: InputDecoration(labelText: "Exercises")),
-              TextField(
-                  controller: exerciseNamesController,
-                  decoration: InputDecoration(labelText: "Exercise Info")),
-            ],
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                TextField(
+                    controller: titleController,
+                    decoration: InputDecoration(labelText: "Workout Type")),
+                TextField(
+                    controller: durationController,
+                    decoration: InputDecoration(labelText: "Minutes"),
+                    keyboardType: TextInputType.number),
+                TextField(
+                    controller: exercisesController,
+                    decoration: InputDecoration(labelText: "Exercises")),
+                TextField(
+                    controller: exerciseNamesController,
+                    decoration: InputDecoration(labelText: "Exercise Info")),
+              ],
+            ),
           ),
           actions: [
             TextButton(
@@ -90,83 +97,27 @@ class _RoutinePageState extends State<RoutinePage> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: const Color(0xFF1A1A1A),
-        cardColor: const Color(0xFF2A2A2A),
-      ),
-      home: Scaffold(
-        body: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      GestureDetector(
-                        onTap: () => _onItemTapped(0),
-                        child: Text("My Workouts",
-                            style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: _selectedIndex == 0
-                                    ? Colors.white
-                                    : Colors.grey[600])),
-                      ),
-                      GestureDetector(
-                        onTap: () => _onItemTapped(1),
-                        child: Text("Explore",
-                            style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: _selectedIndex == 1
-                                    ? Colors.white
-                                    : Colors.grey[600])),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () => _showAddWorkoutModal(context),
-                          icon: Icon(Icons.add, color: Colors.white),
-                          label: Text('New Workout'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.grey[800],
-                            padding: EdgeInsets.symmetric(vertical: 12),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () {},
-                          icon: Icon(Icons.share, color: Colors.white),
-                          label: Text('Share Workout'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.grey[800],
-                            padding: EdgeInsets.symmetric(vertical: 12),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: _selectedIndex == 0
-                  ? ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      itemCount: workouts.length,
-                      itemBuilder: (context, index) {
-                        final workout = workouts[index];
-                        return Card(
+    return Scaffold(
+      body: Column(
+        children: [
+          Expanded(
+            child: _selectedIndex == 0
+                ? ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: workouts.length,
+                    itemBuilder: (context, index) {
+                      final workout = workouts[index];
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  WorkoutDetailPage(workout: workout),
+                            ),
+                          );
+                        },
+                        child: Card(
                           margin: EdgeInsets.only(bottom: 16),
                           color: Colors.grey[900],
                           shape: RoundedRectangleBorder(
@@ -248,92 +199,119 @@ class _RoutinePageState extends State<RoutinePage> {
                               ),
                             ],
                           ),
-                        );
-                      },
-                    )
-                  : SingleChildScrollView(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Programs",
-                              style: TextStyle(
-                                  fontSize: 24, fontWeight: FontWeight.bold)),
-                          SizedBox(height: 16),
-                          Card(
-                            color: Colors.grey[900],
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text("Arnold Split",
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold)),
-                                  SizedBox(height: 8),
-                                  Text("Gym Based Program",
-                                      style:
-                                          TextStyle(color: Colors.grey[400])),
-                                ],
-                              ),
+                        ),
+                      );
+                    },
+                  )
+                : SingleChildScrollView(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("Programs",
+                            style: TextStyle(
+                                fontSize: 24, fontWeight: FontWeight.bold)),
+                        SizedBox(height: 16),
+                        Card(
+                          color: Colors.grey[900],
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Arnold Split",
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold)),
+                                SizedBox(height: 8),
+                                Text("Gym Based Program",
+                                    style: TextStyle(color: Colors.grey[400])),
+                              ],
                             ),
                           ),
-                          SizedBox(height: 24),
-                          Text("Quick Actions",
-                              style: TextStyle(
-                                  fontSize: 24, fontWeight: FontWeight.bold)),
-                          SizedBox(height: 16),
-                          Card(
-                            color: Colors.grey[900],
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text("On-Demand",
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold)),
-                                  SizedBox(height: 8),
-                                  Text("Popular",
-                                      style:
-                                          TextStyle(color: Colors.grey[400])),
-                                  SizedBox(height: 16),
-                                  Text("Explore our Energy Gym programs",
-                                      style:
-                                          TextStyle(color: Colors.grey[400])),
-                                  SizedBox(height: 16),
-                                  Text("Recommendations",
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold)),
-                                  SizedBox(height: 16),
-                                  Text("- Back beginning: 0.5 hours",
-                                      style:
-                                          TextStyle(color: Colors.grey[400])),
-                                  Text("- End",
-                                      style:
-                                          TextStyle(color: Colors.grey[400])),
-                                  SizedBox(height: 16),
-                                  Text("Specializations",
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold)),
-                                  SizedBox(height: 16),
-                                  Text("- Back beginning: 1.0 hours",
-                                      style:
-                                          TextStyle(color: Colors.grey[400])),
-                                  Text("- End",
-                                      style:
-                                          TextStyle(color: Colors.grey[400])),
-                                ],
-                              ),
+                        ),
+                        SizedBox(height: 24),
+                        Text("Quick Actions",
+                            style: TextStyle(
+                                fontSize: 24, fontWeight: FontWeight.bold)),
+                        SizedBox(height: 16),
+                        Card(
+                          color: Colors.grey[900],
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("On-Demand",
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold)),
+                                SizedBox(height: 8),
+                                Text("Popular",
+                                    style: TextStyle(color: Colors.grey[400])),
+                                SizedBox(height: 16),
+                                Text("Explore our Energy Gym programs",
+                                    style: TextStyle(color: Colors.grey[400])),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------
+// Workout Detail Page
+// ---------------------------
+class WorkoutDetailPage extends StatelessWidget {
+  final Map<String, dynamic> workout;
+
+  const WorkoutDetailPage({required this.workout});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(workout['title']),
+        backgroundColor: Colors.orange[800],
+      ),
+      backgroundColor: const Color(0xFF1A1A1A),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Duration: ${workout['duration']}",
+                style: TextStyle(fontSize: 18, color: Colors.white)),
+            SizedBox(height: 8),
+            Text("Exercises: ${workout['exercises']}",
+                style: TextStyle(fontSize: 16, color: Colors.white70)),
+            SizedBox(height: 16),
+            Text("Exercise List:",
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white)),
+            SizedBox(height: 8),
+            Text(workout['exerciseNames'],
+                style: TextStyle(color: Colors.grey[400])),
+            SizedBox(height: 32),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => WorkoutDayScreen()),
+                );
+              },
+              style:
+                  ElevatedButton.styleFrom(backgroundColor: Colors.orange[800]),
+              child: Text("Start Today's Workout"),
             ),
           ],
         ),
@@ -342,6 +320,54 @@ class _RoutinePageState extends State<RoutinePage> {
   }
 }
 
-void main() {
-  runApp(RoutinePage());
+// ---------------------------
+// Workout Day Screen
+// ---------------------------
+class WorkoutDayScreen extends StatelessWidget {
+  final List<Map<String, dynamic>> exercises = List.generate(4, (index) {
+    return {
+      "title": "Incline Chest Press",
+      "setsReps": "3 sets x 12 reps",
+      "rest": "Rest: 30 sec",
+      "image": "https://via.placeholder.com/80x80.png?text=Exercise",
+    };
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        title: Text("Today's Workout"),
+        backgroundColor: Colors.orange[800],
+      ),
+      body: ListView.builder(
+        padding: EdgeInsets.all(16),
+        itemCount: exercises.length,
+        itemBuilder: (context, index) {
+          final exercise = exercises[index];
+          return Card(
+            color: Colors.grey[900],
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            margin: EdgeInsets.only(bottom: 16),
+            child: ListTile(
+              leading: Image.network(exercise['image'], width: 60, height: 60),
+              title: Text(exercise['title'],
+                  style: TextStyle(color: Colors.white)),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(exercise['setsReps'],
+                      style: TextStyle(color: Colors.grey[400])),
+                  Text(exercise['rest'],
+                      style: TextStyle(color: Colors.grey[400])),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
 }
